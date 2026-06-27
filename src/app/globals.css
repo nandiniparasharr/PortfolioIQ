@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * PortfolioIQ theme tokens.
+ *
+ * A single dark theme tuned for analytical density: near-black canvas, layered
+ * graphite surfaces, hairline borders and a restrained teal accent. Semantic
+ * colors (positive / negative / warning) are reserved for data.
+ */
+@layer base {
+  :root {
+    --background: 222 24% 5%;
+    --foreground: 210 20% 92%;
+
+    --surface: 222 20% 7%;
+    --surface-muted: 220 18% 10%;
+    --surface-raised: 220 16% 12%;
+
+    --card: 222 20% 8%;
+    --card-foreground: 210 20% 92%;
+
+    --muted: 220 16% 14%;
+    --muted-foreground: 215 14% 58%;
+
+    --primary: 176 58% 44%;
+    --primary-foreground: 200 30% 6%;
+
+    --accent: 176 58% 44%;
+    --accent-foreground: 200 30% 6%;
+
+    --positive: 152 52% 46%;
+    --negative: 358 64% 56%;
+    --warning: 38 82% 56%;
+
+    --border: 220 14% 17%;
+    --input: 220 14% 17%;
+    --ring: 176 58% 44%;
+
+    --radius: 0.5rem;
+
+    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Menlo", monospace;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "cv01", "tnum";
+  }
+
+  /* Tabular numerals everywhere financial figures appear. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 9999px;
+    border: 2px solid hsl(var(--background));
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(220 14% 22%);
+  }
+}
+
+@layer components {
+  /* Subtle grid texture used behind hero / dashboard headers. */
+  .grid-texture {
+    background-image:
+      linear-gradient(to right, hsl(var(--border) / 0.4) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.4) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%);
+  }
+
+  .metric-divider {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--border)),
+      transparent
+    );
+  }
+}
