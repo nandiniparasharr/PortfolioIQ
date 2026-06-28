@@ -136,12 +136,27 @@ function metaFromSeed(seed: InstrumentSeed): InstrumentMeta {
   return meta;
 }
 
-/** Build a deterministic price history for one instrument. */
-export function syntheticInstrument(ticker: string): InstrumentData {
+/**
+ * Build a deterministic price history for one instrument.
+ *
+ * When `anchorPrice` (the user's cost basis) is provided, the modeled current
+ * price is anchored to it via a bounded, deterministic total return. This keeps
+ * market value and unrealized P&L realistic relative to what the user actually
+ * paid — instead of comparing their cost against an unrelated random price,
+ * which produced absurd figures like +921% or -98%.
+ */
+export function syntheticInstrument(ticker: string, anchorPrice?: number): InstrumentData {
   const seed = seedFor(ticker);
   const factor = marketFactor();
   const dates = getDates();
   const rng = mulberry32(hashString(seed.ticker) ^ 0x9e3779b9);
+
+  let referenceTarget = seed.referencePrice;
+  if (anchorPrice && anchorPrice > 0) {
+    const rrng = mulberry32(hashString(seed.ticker) ^ 0x85ebca6b);
+    const totalReturn = -0.35 + rrng() * 1.2; // bounded -35% .. +85%
+    referenceTarget = anchorPrice * (1 + totalReturn);
+  }
 
   const dailyDrift = seed.annualDrift / TRADING_DAYS_PER_YEAR;
   const idioVol = seed.annualVol / Math.sqrt(TRADING_DAYS_PER_YEAR);
@@ -161,14 +176,14 @@ export function syntheticInstrument(ticker: string): InstrumentData {
     factors.push(cumulative);
   }
   const finalFactor = factors[factors.length - 1]!;
-  const startPrice = seed.referencePrice / finalFactor;
+  const startPrice = referenceTarget / finalFactor;
   for (let t = 0; t < dates.length; t++) {
     history.push({
       date: dates[t]!,
       close: Number((startPrice * factors[t]!).toFixed(2)),
     });
   }
-  const lastPrice = history[history.length - 1]?.close ?? seed.referencePrice;
+  const lastPrice = history[history.length - 1]?.close ?? referenceTarget;
 
   return { meta: metaFromSeed(seed), lastPrice, history };
 }

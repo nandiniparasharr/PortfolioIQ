@@ -28,9 +28,11 @@ function isYahooEnabled(): boolean {
   return (process.env.MARKET_DATA_PROVIDER ?? "synthetic").toLowerCase() === "yahoo";
 }
 
-async function resolveOne(ticker: string): Promise<InstrumentData> {
+async function resolveOne(ticker: string, anchorPrice?: number): Promise<InstrumentData> {
   const symbol = ticker.toUpperCase();
-  const cached = cache.get(symbol);
+  // The anchor (cost basis) affects the modeled price, so it is part of the key.
+  const cacheKey = `${symbol}|${anchorPrice ?? ""}`;
+  const cached = cache.get(cacheKey);
   if (cached && cached.expires > Date.now()) return cached.data;
 
   let data: InstrumentData;
@@ -38,28 +40,35 @@ async function resolveOne(ticker: string): Promise<InstrumentData> {
     try {
       const { fetchYahooInstrument } = await import("./yahoo");
       data = await fetchYahooInstrument(symbol);
-      if (data.history.length < 30) data = syntheticInstrument(symbol);
+      if (data.history.length < 30) data = syntheticInstrument(symbol, anchorPrice);
     } catch {
-      data = syntheticInstrument(symbol);
+      data = syntheticInstrument(symbol, anchorPrice);
     }
   } else {
-    data = syntheticInstrument(symbol);
+    data = syntheticInstrument(symbol, anchorPrice);
   }
 
-  cache.set(symbol, { data, expires: Date.now() + TTL_MS });
+  cache.set(cacheKey, { data, expires: Date.now() + TTL_MS });
   return data;
 }
 
-/** Resolve a batch of tickers with bounded concurrency. */
+/**
+ * Resolve a batch of tickers with bounded concurrency.
+ * `priceHints` maps a ticker to the user's cost basis so the synthetic provider
+ * can anchor modeled prices to it (keeping unrealized P&L realistic).
+ */
 export async function resolveInstruments(
   tickers: string[],
+  priceHints?: Record<string, number>,
 ): Promise<Record<string, InstrumentData>> {
   const unique = Array.from(new Set(tickers.map((t) => t.toUpperCase())));
   const out: Record<string, InstrumentData> = {};
 
   for (let i = 0; i < unique.length; i += MAX_CONCURRENCY) {
     const batch = unique.slice(i, i + MAX_CONCURRENCY);
-    const results = await Promise.all(batch.map((t) => resolveOne(t)));
+    const results = await Promise.all(
+      batch.map((t) => resolveOne(t, priceHints?.[t])),
+    );
     batch.forEach((t, idx) => {
       out[t] = results[idx]!;
     });

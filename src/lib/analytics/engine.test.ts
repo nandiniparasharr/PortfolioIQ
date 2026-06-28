@@ -82,6 +82,34 @@ describe("analytics engine", () => {
     expect(a1.scores.health).toBe(a2.scores.health);
   });
 
+  it("anchors modeled price to cost basis for realistic unrealized returns", () => {
+    // Arbitrary Indian-style tickers with INR cost bases.
+    const book: Holding[] = [
+      { id: "1", ticker: "NIFTYCASE", quantity: 1750, purchasePrice: 100 },
+      { id: "2", ticker: "EMBASSY-RR", quantity: 22, purchasePrice: 350 },
+      { id: "3", ticker: "MGL", quantity: 18, purchasePrice: 1100 },
+    ];
+    const instruments = Object.fromEntries(
+      book.map((h) => [h.ticker, syntheticInstrument(h.ticker, h.purchasePrice)]),
+    );
+    const a = computeAnalytics({
+      holdings: book,
+      instruments,
+      benchmarkHistory: syntheticBenchmark(),
+      currency: "INR",
+    });
+    expect(a.baseCurrency).toBe("INR");
+    for (const p of a.positions) {
+      // Unrealized return is bounded and realistic (no absurd ±900%).
+      expect(p.unrealizedReturn).toBeGreaterThan(-0.4);
+      expect(p.unrealizedReturn).toBeLessThan(0.9);
+      // Modeled price stays in a sane band around cost.
+      const cost = p.holding.purchasePrice!;
+      expect(p.data.lastPrice).toBeGreaterThan(cost * 0.6);
+      expect(p.data.lastPrice).toBeLessThan(cost * 1.9);
+    }
+  });
+
   it("correlation matrix is symmetric with unit diagonal", () => {
     const a = computeAnalytics(buildInput(holdings));
     const { tickers, matrix } = a.risk.correlation;

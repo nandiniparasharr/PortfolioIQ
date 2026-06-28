@@ -37,8 +37,16 @@ export async function POST(request: Request) {
 
   try {
     const tickers = holdings.map((h) => h.ticker);
+    // Anchor modeled prices to each position's cost basis (keeps value &
+    // unrealized P&L realistic when live data isn't available).
+    const priceHints: Record<string, number> = {};
+    for (const h of holdings) {
+      if (h.purchasePrice && h.purchasePrice > 0) {
+        priceHints[h.ticker.toUpperCase()] = h.purchasePrice;
+      }
+    }
     const [instruments, benchmarkHistory] = await Promise.all([
-      resolveInstruments(tickers),
+      resolveInstruments(tickers, priceHints),
       resolveBenchmark(),
     ]);
 

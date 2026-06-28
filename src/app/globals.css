@@ -100,8 +100,19 @@
     @apply border-border;
   }
 
+  /*
+   * Paint the themed background on BOTH html and body. Setting it only on body
+   * lets the html canvas (browser default white) show through in scrolled /
+   * overscroll areas, which looked like a broken "white background" in dark
+   * mode. Anchoring html guarantees the whole page follows the theme.
+   */
+  html {
+    background-color: hsl(var(--background));
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
+    min-height: 100vh;
     font-feature-settings: "ss01", "cv01", "tnum";
     text-rendering: optimizeLegibility;
   }
