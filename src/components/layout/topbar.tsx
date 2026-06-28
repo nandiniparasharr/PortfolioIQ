@@ -7,6 +7,7 @@ import { PRIMARY_NAV } from "./nav";
 import { cn } from "@/lib/utils";
 import { usePortfolioStore } from "@/store/portfolio";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { ISTClock } from "./ist-clock";
 
 /** Compact glass top bar. On small screens it also carries the primary nav. */
 export function Topbar() {
@@ -59,10 +60,7 @@ export function Topbar() {
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="hidden items-center gap-1.5 text-2xs text-muted-foreground sm:flex">
-          <span className="h-1.5 w-1.5 rounded-full bg-positive" />
-          Session active
-        </div>
+        <ISTClock />
         <ThemeToggle className="lg:hidden" />
       </div>
     </header>

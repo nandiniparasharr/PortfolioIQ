@@ -7,6 +7,7 @@ import { usePortfolioStore } from "@/store/portfolio";
 import { useAnalytics } from "@/hooks/use-analytics";
 import {
   formatCompactCurrency,
+  formatDate,
   formatPercent,
   formatSignedPercent,
 } from "@/lib/format";
@@ -60,7 +61,7 @@ export function DashboardView() {
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {formatCompactCurrency(a.totalValue)} across {a.diversification.holdingsCount}{" "}
-            holdings · {a.diversification.sectorCount} sectors · as of {a.asOf}
+            holdings · {a.diversification.sectorCount} sectors · as of {formatDate(a.asOf)} IST
             {perf.observations > 0 && ` · ${perf.observations} trading days`}
           </p>
         </div>

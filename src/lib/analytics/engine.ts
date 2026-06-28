@@ -25,6 +25,7 @@ import type {
   RollingPoint,
 } from "@/types";
 import { clamp } from "@/lib/utils";
+import { todayInIST } from "@/lib/format";
 import {
   TRADING_DAYS_PER_YEAR,
   annualizedReturn,
@@ -429,7 +430,7 @@ export function computeAnalytics(input: EngineInput): PortfolioAnalytics {
   }
 
   return {
-    asOf: new Date().toISOString().slice(0, 10),
+    asOf: todayInIST(),
     baseCurrency: "USD",
     totalValue,
     totalCost,

@@ -1,28 +1,28 @@
 /** Shared chart palette tuned for the dark institutional theme. */
 
-/** Categorical series colors — muted, desaturated, terminal-like. */
+/** Categorical series colors — an indigo-led, jewel-toned palette. */
 export const CATEGORICAL = [
-  "#2dd4bf", // teal (primary)
-  "#60a5fa", // blue
-  "#a78bfa", // violet
+  "#6366f1", // indigo (primary)
+  "#0ea5e9", // sky
+  "#8b5cf6", // violet
+  "#14b8a6", // teal
   "#f59e0b", // amber
-  "#34d399", // emerald
-  "#f472b6", // pink
+  "#ec4899", // pink
   "#22d3ee", // cyan
   "#fb923c", // orange
-  "#94a3b8", // slate
-  "#c084fc", // purple
-  "#4ade80", // green
-  "#facc15", // yellow
+  "#10b981", // emerald
+  "#a855f7", // purple
+  "#64748b", // slate
+  "#eab308", // yellow
 ];
 
 export const CHART_COLORS = {
-  primary: "#2dd4bf",
-  positive: "#34d399",
-  negative: "#f87171",
-  grid: "rgba(148, 163, 184, 0.12)",
-  axis: "rgba(148, 163, 184, 0.55)",
-  benchmark: "#64748b",
+  primary: "#6366f1",
+  positive: "#10b981",
+  negative: "#ef4444",
+  grid: "rgba(100, 116, 139, 0.16)",
+  axis: "rgba(100, 116, 139, 0.7)",
+  benchmark: "#94a3b8",
 };
 
 export function categorical(index: number): string {
