@@ -3,92 +3,97 @@
 @tailwind utilities;
 
 /*
- * PortfolioIQ design system — "Indigo Slate".
+ * PortfolioIQ design system.
  *
- * Two themes share one token contract:
- *   :root  → light theme: crisp white surfaces, slate-900 text (high contrast)
- *   .dark  → dark theme: deep navy canvas, bright readable foreground
- * The accent is a confident indigo; semantic colors (positive / negative /
- * warning) are tuned per-theme so data stays legible on either background.
+ *   :root  → light theme: warm ivory canvas, dark-navy text, green hero accent
+ *   .dark  → dark theme:  near-black canvas, white text, coral→blue hero accent
+ * The primary action color is a confident blue in both themes.
  */
 @layer base {
   :root {
-    --background: 220 33% 97%;
-    --foreground: 222 47% 11%;
+    --background: 45 50% 96%;
+    --foreground: 222 47% 15%;
 
     --surface: 0 0% 100%;
-    --surface-muted: 220 30% 95%;
+    --surface-muted: 44 38% 93%;
     --surface-raised: 0 0% 100%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 222 47% 15%;
 
-    --muted: 220 24% 91%;
-    --muted-foreground: 218 16% 36%;
+    --muted: 44 30% 90%;
+    --muted-foreground: 220 18% 34%;
 
-    --primary: 231 64% 52%;
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
 
-    --accent: 231 64% 52%;
+    --accent: 221 83% 53%;
     --accent-foreground: 0 0% 100%;
 
-    --positive: 152 62% 32%;
+    --positive: 152 64% 30%;
     --negative: 0 72% 45%;
     --warning: 28 90% 38%;
 
-    --border: 220 20% 86%;
-    --input: 220 20% 83%;
-    --ring: 231 64% 52%;
+    --border: 42 26% 84%;
+    --input: 42 26% 82%;
+    --ring: 221 83% 53%;
 
     --radius: 0.625rem;
 
+    /* Hero accent — light theme uses a solid forest green. */
+    --hero: 150 72% 30%;
+
     --glass-bg: 0 0% 100%;
     --glass-opacity: 0.82;
-    --glass-border: 220 24% 86%;
+    --glass-border: 42 28% 85%;
     --glass-highlight: 0 0% 100%;
-    --aurora-1: 231 72% 60%;
-    --aurora-2: 199 82% 55%;
-    --aurora-3: 263 70% 62%;
+    --aurora-1: 150 60% 52%;
+    --aurora-2: 210 80% 60%;
+    --aurora-3: 168 60% 50%;
 
     --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     --font-mono: ui-monospace, "SF Mono", "Menlo", monospace;
   }
 
   .dark {
-    --background: 224 44% 5%;
-    --foreground: 213 31% 94%;
+    --background: 240 9% 4%;
+    --foreground: 0 0% 98%;
 
-    --surface: 224 38% 8%;
-    --surface-muted: 223 30% 11%;
-    --surface-raised: 223 28% 13%;
+    --surface: 240 8% 7%;
+    --surface-muted: 240 7% 10%;
+    --surface-raised: 240 7% 12%;
 
-    --card: 224 36% 9%;
-    --card-foreground: 213 31% 94%;
+    --card: 240 8% 7%;
+    --card-foreground: 0 0% 98%;
 
-    --muted: 223 24% 17%;
-    --muted-foreground: 217 20% 66%;
+    --muted: 240 6% 16%;
+    --muted-foreground: 240 6% 70%;
 
-    --primary: 232 84% 70%;
-    --primary-foreground: 224 44% 6%;
+    --primary: 217 92% 62%;
+    --primary-foreground: 0 0% 100%;
 
-    --accent: 232 84% 70%;
-    --accent-foreground: 224 44% 6%;
+    --accent: 217 92% 62%;
+    --accent-foreground: 0 0% 100%;
 
-    --positive: 152 56% 52%;
-    --negative: 358 72% 64%;
-    --warning: 38 90% 60%;
+    --positive: 152 60% 54%;
+    --negative: 358 75% 66%;
+    --warning: 38 92% 62%;
 
-    --border: 222 22% 18%;
-    --input: 222 22% 20%;
-    --ring: 232 84% 70%;
+    --border: 240 6% 17%;
+    --input: 240 6% 20%;
+    --ring: 217 92% 62%;
 
-    --glass-bg: 224 36% 11%;
-    --glass-opacity: 0.6;
-    --glass-border: 222 28% 30%;
-    --glass-highlight: 210 40% 82%;
-    --aurora-1: 231 70% 58%;
-    --aurora-2: 199 75% 50%;
-    --aurora-3: 263 64% 56%;
+    /* Hero accent — dark theme uses a coral→blue gradient. */
+    --hero-from: 8 100% 71%;
+    --hero-to: 208 100% 66%;
+
+    --glass-bg: 240 8% 9%;
+    --glass-opacity: 0.55;
+    --glass-border: 240 8% 26%;
+    --glass-highlight: 0 0% 90%;
+    --aurora-1: 8 92% 62%;
+    --aurora-2: 210 92% 60%;
+    --aurora-3: 228 72% 56%;
   }
 
   * {
@@ -128,15 +133,31 @@
 }
 
 @layer components {
-  /* Liquid-glass surface: translucent, blurred, with a crisp top highlight. */
+  /* Hero accent word — solid green in light, coral→blue gradient in dark. */
+  .hero-accent {
+    color: hsl(var(--hero));
+    font-weight: 700;
+  }
+  .dark .hero-accent {
+    background-image: linear-gradient(
+      92deg,
+      hsl(var(--hero-from)),
+      hsl(var(--hero-to))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Liquid-glass surface. */
   .glass {
     background-color: hsl(var(--glass-bg) / var(--glass-opacity));
     backdrop-filter: blur(16px) saturate(150%);
     -webkit-backdrop-filter: blur(16px) saturate(150%);
     border: 1px solid hsl(var(--glass-border) / 0.7);
     box-shadow:
-      inset 0 1px 0 0 hsl(var(--glass-highlight) / 0.14),
-      0 10px 34px -16px hsl(231 60% 12% / 0.35);
+      inset 0 1px 0 0 hsl(var(--glass-highlight) / 0.12),
+      0 10px 34px -16px hsl(240 40% 4% / 0.35);
   }
 
   .glass-hover {
@@ -149,11 +170,10 @@
     transform: translateY(-2px);
     border-color: hsl(var(--primary) / 0.45);
     box-shadow:
-      inset 0 1px 0 0 hsl(var(--glass-highlight) / 0.2),
+      inset 0 1px 0 0 hsl(var(--glass-highlight) / 0.18),
       0 18px 44px -18px hsl(var(--primary) / 0.35);
   }
 
-  /* Animated aurora field used behind the hero. */
   .aurora {
     position: absolute;
     inset: 0;
@@ -164,11 +184,11 @@
   .aurora::after {
     content: "";
     position: absolute;
-    width: 58vw;
-    height: 58vw;
+    width: 56vw;
+    height: 56vw;
     border-radius: 9999px;
     filter: blur(90px);
-    opacity: 0.4;
+    opacity: 0.32;
     will-change: transform;
   }
   .aurora::before {
@@ -191,20 +211,6 @@
     background-size: 46px 46px;
     mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%);
   }
-
-  .text-gradient {
-    background: linear-gradient(
-      120deg,
-      hsl(var(--primary)),
-      hsl(var(--aurora-2)),
-      hsl(var(--primary))
-    );
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    animation: sheen 6s linear infinite;
-  }
 }
 
 @keyframes aurora-drift-a {
@@ -223,10 +229,5 @@
   }
   50% {
     transform: translate(-8%, 4%) scale(1);
-  }
-}
-@keyframes sheen {
-  to {
-    background-position: 200% center;
   }
 }

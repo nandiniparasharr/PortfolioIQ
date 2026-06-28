@@ -15,6 +15,8 @@ import {
   Upload,
   PencilLine,
   TrendingUp,
+  LineChart,
+  Wand2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +32,12 @@ const CAPABILITIES = [
   { icon: Sparkles, title: "AI commentary", body: "Institutional narrative strictly grounded in the computed analytics." },
 ];
 
+const STEPS = [
+  { icon: Upload, title: "Add your holdings", body: "Import a CSV or Excel export from your broker, or type positions by hand. The table is auto-detected." },
+  { icon: LineChart, title: "Compute analytics", body: "A deterministic engine resolves market data and computes every metric from real daily return series." },
+  { icon: Wand2, title: "Read the narrative", body: "An institutional AI layer interprets the computed numbers into a clear, actionable portfolio brief." },
+];
+
 const METHODS = [
   "Herfindahl-Hirschman Index",
   "Historical VaR (95% / 99%)",
@@ -39,10 +47,7 @@ const METHODS = [
   "Rolling volatility",
 ];
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
-  visible: { opacity: 1, y: 0 },
-};
+const fadeUp = { hidden: { opacity: 0, y: 18 }, visible: { opacity: 1, y: 0 } };
 
 export default function HomePage() {
   const router = useRouter();
@@ -73,10 +78,10 @@ export default function HomePage() {
           <motion.h1
             variants={fadeUp}
             transition={{ duration: 0.5 }}
-            className="mx-auto max-w-3xl text-balance text-4xl font-semibold leading-[1.05] tracking-tight lg:text-6xl"
+            className="mx-auto max-w-3xl text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-foreground lg:text-6xl"
           >
             Your portfolio, analyzed like a{" "}
-            <span className="text-gradient">professional desk</span> would.
+            <span className="hero-accent">professional desk</span> would.
           </motion.h1>
 
           <motion.p
@@ -115,7 +120,6 @@ export default function HomePage() {
           </motion.p>
         </motion.div>
 
-        {/* Product preview */}
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
@@ -126,7 +130,7 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* Two ways to start */}
+      {/* Get started */}
       <section className="relative mx-auto max-w-5xl px-6 py-14">
         <SectionHeading eyebrow="Get started" title="Two ways to build your portfolio" center />
         <div className="grid gap-4 md:grid-cols-2">
@@ -144,6 +148,37 @@ export default function HomePage() {
             body="Type positions with ticker autocomplete. Quantity and cost per share are captured for full unrealized P&L."
             cta="Enter holdings"
           />
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how-it-works" className="relative mx-auto max-w-5xl scroll-mt-24 px-6 py-14">
+        <SectionHeading eyebrow="How it works" title="From positions to a portfolio brief" center />
+        <div className="grid gap-3 md:grid-cols-3">
+          {STEPS.map((s, i) => {
+            const Icon = s.icon;
+            return (
+              <motion.div
+                key={s.title}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                className="glass rounded-2xl p-6"
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <span className="text-2xl font-semibold tabular text-muted-foreground/30">
+                    0{i + 1}
+                  </span>
+                </div>
+                <h3 className="text-sm font-semibold tracking-tight text-foreground">{s.title}</h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{s.body}</p>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
@@ -177,22 +212,26 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* Methodology */}
-      <section className="relative mx-auto max-w-5xl px-6 py-14 pb-24">
+      {/* About */}
+      <section id="about" className="relative mx-auto max-w-5xl scroll-mt-24 px-6 py-14 pb-24">
         <div className="glass rounded-2xl p-6 lg:p-10">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-md">
-              <h2 className="text-xl font-semibold tracking-tight text-foreground">
-                Transparent methodology
+            <div className="max-w-xl">
+              <div className="text-2xs font-semibold uppercase tracking-wider text-primary">About</div>
+              <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+                Transparent, institutional-grade by design
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                Every metric is computed from documented formulas on real daily
-                return series — no mocked calculations, no fabricated figures. The
-                AI only interprets numbers it is given.
+                PortfolioIQ is a portfolio analytics platform built to the standard
+                of an internal analytics desk. Every metric is computed from
+                documented formulas on real daily return series — no mocked
+                calculations and no fabricated figures. The AI layer only
+                interprets numbers it is given, and your holdings never leave your
+                browser session.
               </p>
               <Button asChild size="sm" className="mt-5">
                 <Link href="/portfolio">
-                  Get started
+                  Build your portfolio
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </Button>
@@ -268,9 +307,7 @@ function DashboardPreview() {
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/15 text-primary">
             <TrendingUp className="h-4 w-4" />
           </div>
-          <span className="text-sm font-semibold tracking-tight text-foreground">
-            Portfolio Health
-          </span>
+          <span className="text-sm font-semibold tracking-tight text-foreground">Portfolio Health</span>
         </div>
         <Badge variant="positive">Grade A</Badge>
       </div>
