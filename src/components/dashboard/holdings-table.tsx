@@ -19,6 +19,7 @@ import {
   type Currency,
 } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { PriceSourceTag } from "./price-source-tag";
 
 export function HoldingsTable({
   positions,
@@ -97,9 +98,12 @@ export function HoldingsTable({
         header: "Current Price",
         meta: { align: "right" },
         cell: (ctx) => (
-          <span className="tabular">
-            {formatCurrency(ctx.row.original.data.lastPrice, currency, true)}
-          </span>
+          <div className="flex flex-col items-end">
+            <span className="tabular">
+              {formatCurrency(ctx.row.original.data.lastPrice, currency, true)}
+            </span>
+            <PriceSourceTag source={ctx.row.original.data.priceSource} />
+          </div>
         ),
       },
       {

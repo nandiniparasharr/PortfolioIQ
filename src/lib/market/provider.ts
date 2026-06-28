@@ -32,7 +32,8 @@ interface CacheEntry {
 }
 
 const cache = new Map<string, CacheEntry>();
-let liveDisabledUntil = 0;
+let yahooDisabledUntil = 0;
+let yahooConsecutiveFails = 0;
 
 function isLivePricingEnabled(): boolean {
   // Live by default; set MARKET_DATA_PROVIDER=synthetic to force offline data.
@@ -54,28 +55,36 @@ function isMutualFund(ticker: string, isin?: string): boolean {
   return /\s/.test(ticker) || (!!isin && /^INF/i.test(isin)) || ticker.length > 16;
 }
 
-/** Try to resolve a live price; trips the breaker on a network failure. */
+/**
+ * Resolve a live price. Mutual funds and equities use independent upstreams and
+ * breakers, so a slow/blocked MF lookup never disables equity quotes (or vice
+ * versa). The Yahoo breaker only trips after several consecutive failures, so a
+ * single transient blip doesn't push the rest of the portfolio "to cost".
+ */
 async function fetchLivePrice(
   ticker: string,
   currency: string | undefined,
   isin: string | undefined,
 ): Promise<number | null> {
-  if (Date.now() < liveDisabledUntil) return null;
-
-  // Mutual funds → AMFI NAV (by ISIN or scheme name).
+  // Mutual funds → AMFI NAV (AMFI manages its own breaker).
   if (isMutualFund(ticker, isin)) {
     const { fetchMfNav } = await import("./amfi");
     return fetchMfNav(isin, ticker);
   }
 
   // Equities / ETFs → Yahoo quote.
+  if (Date.now() < yahooDisabledUntil) return null;
   const { fetchYahooPrice } = await import("./yahoo");
   for (const symbol of symbolCandidates(ticker, currency)) {
     try {
       const price = await fetchYahooPrice(symbol);
-      if (price) return price;
+      if (price) {
+        yahooConsecutiveFails = 0;
+        return price;
+      }
     } catch {
-      liveDisabledUntil = Date.now() + BREAKER_MS;
+      yahooConsecutiveFails++;
+      if (yahooConsecutiveFails >= 3) yahooDisabledUntil = Date.now() + BREAKER_MS;
       return null;
     }
   }
@@ -104,11 +113,17 @@ async function resolveOne(
     source = "cost";
   }
 
-  const cacheKey = `${symbol}|${anchor ?? ""}|${source}|${currency ?? ""}`;
+  const priceSource: "live" | "user" | "cost" =
+    source === "live" || source === "user" ? source : "cost";
+
+  const cacheKey = `${symbol}|${anchor ?? ""}|${priceSource}|${currency ?? ""}`;
   const cached = cache.get(cacheKey);
   if (cached && cached.expires > Date.now()) return cached.data;
 
-  const data = syntheticInstrument(symbol, anchor, currency);
+  const data: InstrumentData = {
+    ...syntheticInstrument(symbol, anchor, currency),
+    priceSource,
+  };
   cache.set(cacheKey, { data, expires: Date.now() + TTL_MS });
   return data;
 }
