@@ -32,7 +32,9 @@ type Field = "ticker" | "quantity" | "purchasePrice" | "currentPrice" | "purchas
 
 /** Substrings that, if present in a normalized header, map it to a field. */
 const FIELD_MATCHERS: Record<Field, string[]> = {
-  ticker: ["ticker", "symbol", "stock", "security", "instrument"],
+  // Includes mutual-fund identifiers (scheme / fund name / ISIN) so MF rows,
+  // which have no ticker symbol, are recognised too.
+  ticker: ["ticker", "symbol", "stock", "security", "instrument", "scheme", "fundname", "isin"],
   quantity: ["quantity", "shares", "qty", "units", "position", "noofshares", "numberofshares"],
   purchasePrice: ["avgcost", "averageprice", "avgprice", "buyprice", "costpershare", "cost", "basis", "paid", "price"],
   currentPrice: ["currentprice", "currentnav", "marketprice", "lasttraded", "lastprice", "ltp", "cmp", "nav", "currentmarketprice"],
@@ -86,7 +88,16 @@ function toNumber(value: unknown): number {
   return Number(cleaned);
 }
 
-const TICKER_RE = /^[A-Za-z][A-Za-z0-9.\-]{0,11}$/;
+/**
+ * Accept both ticker symbols ("ITC", "EMBASSY-RR") and longer fund/scheme
+ * identifiers ("Axis Bluechip Fund - Direct Growth", an ISIN). Must contain a
+ * letter and not be a pure number; capped to a sane length.
+ */
+function isValidIdentifier(s: string): boolean {
+  if (!s || s.length > 64) return false;
+  if (/^\d+(\.\d+)?$/.test(s)) return false;
+  return /[A-Za-z]/.test(s);
+}
 
 /** Normalize a variety of date inputs to ISO yyyy-mm-dd, else undefined. */
 function normalizeDate(value: unknown): string | undefined {
@@ -147,7 +158,7 @@ function gridToHoldings(grid: unknown[][]): ParseOutcome {
     const quantity = toNumber(row[columns.quantity!]);
     const price = toNumber(row[columns.purchasePrice!]);
 
-    if (!TICKER_RE.test(ticker) || !Number.isFinite(quantity) || quantity <= 0) {
+    if (!isValidIdentifier(ticker) || !Number.isFinite(quantity) || quantity <= 0) {
       skipped++;
       continue;
     }

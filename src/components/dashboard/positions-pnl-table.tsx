@@ -3,7 +3,6 @@ import {
   formatCompactCurrency,
   formatCurrency,
   formatPercent,
-  formatSignedPercent,
   type Currency,
 } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -36,18 +35,17 @@ export function PositionsPnlTable({
             <th className="px-4 py-2.5 text-left font-medium">Ticker</th>
             <th className="px-4 py-2.5 text-right font-medium">Weight</th>
             <th className="px-4 py-2.5 text-right font-medium">Avg Price</th>
-            <th className="px-4 py-2.5 text-right font-medium">Return</th>
+            <th className="px-4 py-2.5 text-right font-medium">Current Price</th>
             <th className="px-4 py-2.5 text-right font-medium">Current Value</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((p) => {
-            const ret = p.unrealizedReturn;
             const gain = p.unrealizedGain;
             const positive = (gain ?? 0) >= 0;
             return (
               <tr key={p.data.meta.ticker} className="border-b border-border last:border-0">
-                <td className="px-4 py-2.5 font-mono text-xs font-semibold text-primary">
+                <td className="max-w-[200px] truncate px-4 py-2.5 font-mono text-xs font-semibold text-primary">
                   {p.data.meta.ticker}
                 </td>
                 <td className="px-4 py-2.5 text-right tabular">
@@ -58,17 +56,8 @@ export function PositionsPnlTable({
                     ? formatCurrency(p.holding.purchasePrice, currency, true)
                     : "—"}
                 </td>
-                <td
-                  className={cn(
-                    "px-4 py-2.5 text-right tabular",
-                    ret === undefined
-                      ? "text-muted-foreground"
-                      : ret >= 0
-                        ? "text-positive"
-                        : "text-negative",
-                  )}
-                >
-                  {ret === undefined ? "—" : formatSignedPercent(ret)}
+                <td className="px-4 py-2.5 text-right tabular">
+                  {formatCurrency(p.data.lastPrice, currency, true)}
                 </td>
                 <td className="px-4 py-2.5 text-right">
                   <div className="tabular font-medium">

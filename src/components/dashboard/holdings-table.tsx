@@ -59,6 +59,17 @@ export function HoldingsTable({
         ),
       },
       {
+        accessorFn: (p) => p.weight,
+        id: "weight",
+        header: "Weight",
+        meta: { align: "right" },
+        cell: (ctx) => (
+          <span className="tabular font-medium">
+            {formatPercent(ctx.row.original.weight)}
+          </span>
+        ),
+      },
+      {
         accessorFn: (p) => p.holding.quantity,
         id: "quantity",
         header: "Qty",
@@ -68,9 +79,22 @@ export function HoldingsTable({
         ),
       },
       {
+        accessorFn: (p) => p.holding.purchasePrice ?? 0,
+        id: "avgPrice",
+        header: "Avg Price",
+        meta: { align: "right" },
+        cell: (ctx) => (
+          <span className="tabular text-muted-foreground">
+            {ctx.row.original.holding.purchasePrice
+              ? formatCurrency(ctx.row.original.holding.purchasePrice, currency, true)
+              : "—"}
+          </span>
+        ),
+      },
+      {
         accessorFn: (p) => p.data.lastPrice,
-        id: "price",
-        header: "Price",
+        id: "currentPrice",
+        header: "Current Price",
         meta: { align: "right" },
         cell: (ctx) => (
           <span className="tabular">
@@ -86,17 +110,6 @@ export function HoldingsTable({
         cell: (ctx) => (
           <span className="tabular">
             {formatCompactCurrency(ctx.row.original.marketValue, currency)}
-          </span>
-        ),
-      },
-      {
-        accessorFn: (p) => p.weight,
-        id: "weight",
-        header: "Weight",
-        meta: { align: "right" },
-        cell: (ctx) => (
-          <span className="tabular font-medium">
-            {formatPercent(ctx.row.original.weight)}
           </span>
         ),
       },

@@ -58,6 +58,21 @@ describe("parseHoldingsFile (CSV)", () => {
     });
   });
 
+  it("imports mutual-fund rows identified by scheme name", async () => {
+    const csv = [
+      "Scheme Name,Units,Cost,Current NAV",
+      "Axis Bluechip Fund Direct Growth,120.5,45.2,52.8",
+    ].join("\n");
+    const out = await parseHoldingsFile(csvFile(csv));
+    expect(out.holdings).toHaveLength(1);
+    expect(out.holdings[0]).toMatchObject({
+      ticker: "AXIS BLUECHIP FUND DIRECT GROWTH",
+      quantity: 120.5,
+      purchasePrice: 45.2,
+      currentPrice: 52.8,
+    });
+  });
+
   it("skips rows that are missing the required cost per share", async () => {
     const csv = [
       "ticker,quantity,price",
