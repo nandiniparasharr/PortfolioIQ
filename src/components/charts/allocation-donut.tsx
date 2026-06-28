@@ -3,10 +3,16 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import type { AllocationSlice } from "@/types";
 import { categorical } from "./palette";
-import { formatCompactCurrency, formatPercent } from "@/lib/format";
+import { formatCompactCurrency, formatPercent, type Currency } from "@/lib/format";
 import { TooltipShell, TooltipRow } from "./chart-tooltip";
 
-export function AllocationDonut({ data }: { data: AllocationSlice[] }) {
+export function AllocationDonut({
+  data,
+  currency,
+}: {
+  data: AllocationSlice[];
+  currency: Currency;
+}) {
   const top = data.slice(0, 11);
   const rest = data.slice(11);
   const slices =
@@ -50,7 +56,7 @@ export function AllocationDonut({ data }: { data: AllocationSlice[] }) {
                   <TooltipShell>
                     <div className="mb-1 font-medium text-foreground">{d.label}</div>
                     <TooltipRow label="Weight" value={formatPercent(d.weight)} />
-                    <TooltipRow label="Value" value={formatCompactCurrency(d.value)} />
+                    <TooltipRow label="Value" value={formatCompactCurrency(d.value, currency)} />
                   </TooltipShell>
                 );
               }}

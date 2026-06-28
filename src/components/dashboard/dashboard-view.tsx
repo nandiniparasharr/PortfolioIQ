@@ -10,6 +10,7 @@ import {
   formatDate,
   formatPercent,
   formatSignedPercent,
+  type Currency,
 } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ import { ContributionTable } from "./contribution-table";
 import { AllocationBars } from "./allocation-bars";
 import { CommentaryPanel } from "./commentary-panel";
 import { ExportMenu } from "./export-menu";
+import { CurrencyToggle } from "@/components/portfolio/currency-toggle";
 import { AllocationDonut } from "@/components/charts/allocation-donut";
 import { EquityCurveChart } from "@/components/charts/equity-curve";
 import { RollingChart } from "@/components/charts/rolling-chart";
@@ -30,7 +32,8 @@ import { CorrelationHeatmap } from "@/components/charts/correlation-heatmap";
 
 export function DashboardView() {
   const holdings = usePortfolioStore((s) => s.holdings);
-  const { status, data, error } = useAnalytics(holdings);
+  const currency = usePortfolioStore((s) => s.currency);
+  const { status, data, error } = useAnalytics(holdings, currency);
   const [sectorFilter, setSectorFilter] = React.useState<string | null>(null);
 
   if (holdings.length === 0) return <EmptyState />;
@@ -38,6 +41,7 @@ export function DashboardView() {
   if (status === "error" || !data) return <ErrorState message={error} />;
 
   const { analytics, commentary } = data;
+  const ccy = analytics.baseCurrency as Currency;
   const a = analytics;
   const perf = a.performance;
 
@@ -60,12 +64,13 @@ export function DashboardView() {
             <Badge variant={gradeTone(a.scores.grade)}>Grade {a.scores.grade}</Badge>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            {formatCompactCurrency(a.totalValue)} across {a.diversification.holdingsCount}{" "}
+            {formatCompactCurrency(a.totalValue, ccy)} across {a.diversification.holdingsCount}{" "}
             holdings · {a.diversification.sectorCount} sectors · as of {formatDate(a.asOf)} IST
             {perf.observations > 0 && ` · ${perf.observations} trading days`}
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <CurrencyToggle />
           <ExportMenu analytics={a} />
           <Button asChild variant="outline" size="sm">
             <Link href="/portfolio">Edit holdings</Link>
@@ -107,7 +112,7 @@ export function DashboardView() {
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <MetricCard
             label="Total Value"
-            value={formatCompactCurrency(a.totalValue)}
+            value={formatCompactCurrency(a.totalValue, ccy)}
             hint={a.totalUnrealizedReturn !== undefined ? `Unrealized ${formatSignedPercent(a.totalUnrealizedReturn)}` : undefined}
             tone={a.totalUnrealizedReturn !== undefined && a.totalUnrealizedReturn < 0 ? "negative" : "neutral"}
           />
@@ -125,7 +130,7 @@ export function DashboardView() {
               <CardTitle>Sector Exposure</CardTitle>
             </CardHeader>
             <CardContent>
-              <AllocationDonut data={a.allocation.bySector} />
+              <AllocationDonut data={a.allocation.bySector} currency={ccy} />
             </CardContent>
           </Card>
           <div className="space-y-4">
@@ -134,7 +139,7 @@ export function DashboardView() {
                 <CardTitle>Geographic</CardTitle>
               </CardHeader>
               <CardContent>
-                <AllocationBars data={a.allocation.byRegion} />
+                <AllocationBars data={a.allocation.byRegion} currency={ccy} />
               </CardContent>
             </Card>
             <Card>
@@ -142,7 +147,7 @@ export function DashboardView() {
                 <CardTitle>Market Cap</CardTitle>
               </CardHeader>
               <CardContent>
-                <AllocationBars data={a.allocation.byMarketCap} />
+                <AllocationBars data={a.allocation.byMarketCap} currency={ccy} />
               </CardContent>
             </Card>
           </div>
@@ -157,7 +162,7 @@ export function DashboardView() {
               <CardTitle>Equity Curve</CardTitle>
             </CardHeader>
             <CardContent>
-              <EquityCurveChart data={perf.equityCurve} />
+              <EquityCurveChart data={perf.equityCurve} currency={ccy} />
             </CardContent>
           </Card>
           <div className="grid gap-3">
@@ -229,7 +234,7 @@ export function DashboardView() {
           </div>
         }
       >
-        <HoldingsTable positions={filteredPositions} />
+        <HoldingsTable positions={filteredPositions} currency={ccy} />
       </Section>
 
       {/* Commentary */}

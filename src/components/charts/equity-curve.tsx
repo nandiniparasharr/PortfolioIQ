@@ -10,13 +10,15 @@ import {
   Tooltip,
 } from "recharts";
 import { CHART_COLORS } from "./palette";
-import { formatCompactCurrency, formatDate } from "@/lib/format";
+import { formatCompactCurrency, formatDate, type Currency } from "@/lib/format";
 import { TooltipShell, TooltipRow } from "./chart-tooltip";
 
 export function EquityCurveChart({
   data,
+  currency,
 }: {
   data: { date: string; value: number }[];
+  currency: Currency;
 }) {
   return (
     <div className="h-64 w-full">
@@ -42,7 +44,7 @@ export function EquityCurveChart({
             tickLine={false}
             axisLine={false}
             width={52}
-            tickFormatter={(v) => formatCompactCurrency(v as number)}
+            tickFormatter={(v) => formatCompactCurrency(v as number, currency)}
             domain={["auto", "auto"]}
           />
           <Tooltip
@@ -56,7 +58,7 @@ export function EquityCurveChart({
                   <TooltipRow
                     color={CHART_COLORS.primary}
                     label="Portfolio value"
-                    value={formatCompactCurrency(payload[0]!.value as number)}
+                    value={formatCompactCurrency(payload[0]!.value as number, currency)}
                   />
                 </TooltipShell>
               );

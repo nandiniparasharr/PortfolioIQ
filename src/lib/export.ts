@@ -60,7 +60,7 @@ export function exportAnalyticsJson(a: PortfolioAnalytics) {
 export function exportMetricsCsv(a: PortfolioAnalytics) {
   const lines: [string, string][] = [
     ["As of", a.asOf],
-    ["Total value (USD)", a.totalValue.toFixed(2)],
+    [`Total value (${a.baseCurrency})`, a.totalValue.toFixed(2)],
     ["Health score", String(a.scores.health)],
     ["Grade", a.scores.grade],
     ["Risk score", String(a.scores.risk)],

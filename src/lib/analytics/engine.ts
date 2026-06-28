@@ -54,6 +54,8 @@ export interface EngineInput {
   /** Benchmark daily close history (e.g. S&P 500 proxy). */
   benchmarkHistory: { date: string; close: number }[];
   riskFreeRate?: number;
+  /** Display currency for the analysis (default INR). */
+  currency?: string;
 }
 
 /** Intersect the trading days available across all instruments + benchmark. */
@@ -431,7 +433,7 @@ export function computeAnalytics(input: EngineInput): PortfolioAnalytics {
 
   return {
     asOf: todayInIST(),
-    baseCurrency: "USD",
+    baseCurrency: input.currency ?? "INR",
     totalValue,
     totalCost,
     totalUnrealizedGain,

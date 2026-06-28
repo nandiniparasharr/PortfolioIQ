@@ -1,33 +1,58 @@
 /** Presentation-layer formatting helpers. All are pure and locale-stable. */
 
-const currencyFmt = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
+export type Currency = "USD" | "INR";
 
-const currencyFmtPrecise = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
+export const DEFAULT_CURRENCY: Currency = "INR";
 
-export function formatCurrency(value: number, precise = false): string {
-  if (!Number.isFinite(value)) return "—";
-  return (precise ? currencyFmtPrecise : currencyFmt).format(value);
+const LOCALE: Record<Currency, string> = { USD: "en-US", INR: "en-IN" };
+const SYMBOL: Record<Currency, string> = { USD: "$", INR: "₹" };
+
+export const CURRENCY_META: Record<Currency, { code: Currency; symbol: string; label: string }> = {
+  INR: { code: "INR", symbol: "₹", label: "INR" },
+  USD: { code: "USD", symbol: "$", label: "USD" },
+};
+
+function moneyFormatter(currency: Currency, precise: boolean): Intl.NumberFormat {
+  return new Intl.NumberFormat(LOCALE[currency], {
+    style: "currency",
+    currency,
+    minimumFractionDigits: precise ? 2 : 0,
+    maximumFractionDigits: precise ? 2 : 0,
+  });
 }
 
-/** Abbreviated currency for large figures, e.g. $2.9T, $14.3B. */
-export function formatCompactCurrency(value: number): string {
+export function formatCurrency(
+  value: number,
+  currency: Currency = DEFAULT_CURRENCY,
+  precise = false,
+): string {
   if (!Number.isFinite(value)) return "—";
+  return moneyFormatter(currency, precise).format(value);
+}
+
+/**
+ * Abbreviated currency for large figures. Uses the Indian numbering system
+ * (Lakh / Crore) for INR and the Western system (K/M/B/T) for USD.
+ */
+export function formatCompactCurrency(
+  value: number,
+  currency: Currency = DEFAULT_CURRENCY,
+): string {
+  if (!Number.isFinite(value)) return "—";
+  const sym = SYMBOL[currency];
   const abs = Math.abs(value);
   const sign = value < 0 ? "-" : "";
-  if (abs >= 1e12) return `${sign}$${(abs / 1e12).toFixed(2)}T`;
-  if (abs >= 1e9) return `${sign}$${(abs / 1e9).toFixed(2)}B`;
-  if (abs >= 1e6) return `${sign}$${(abs / 1e6).toFixed(2)}M`;
-  if (abs >= 1e3) return `${sign}$${(abs / 1e3).toFixed(1)}K`;
-  return `${sign}$${abs.toFixed(0)}`;
+  if (currency === "INR") {
+    if (abs >= 1e7) return `${sign}${sym}${(abs / 1e7).toFixed(2)}Cr`;
+    if (abs >= 1e5) return `${sign}${sym}${(abs / 1e5).toFixed(2)}L`;
+    if (abs >= 1e3) return `${sign}${sym}${(abs / 1e3).toFixed(1)}K`;
+    return `${sign}${sym}${abs.toFixed(0)}`;
+  }
+  if (abs >= 1e12) return `${sign}${sym}${(abs / 1e12).toFixed(2)}T`;
+  if (abs >= 1e9) return `${sign}${sym}${(abs / 1e9).toFixed(2)}B`;
+  if (abs >= 1e6) return `${sign}${sym}${(abs / 1e6).toFixed(2)}M`;
+  if (abs >= 1e3) return `${sign}${sym}${(abs / 1e3).toFixed(1)}K`;
+  return `${sign}${sym}${abs.toFixed(0)}`;
 }
 
 /** Decimal fraction -> percent string, e.g. 0.1234 -> "12.34%". */

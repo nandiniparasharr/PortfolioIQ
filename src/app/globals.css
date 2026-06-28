@@ -83,9 +83,9 @@
     --input: 240 6% 20%;
     --ring: 217 92% 62%;
 
-    /* Hero accent — dark theme uses a coral→blue gradient. */
-    --hero-from: 8 100% 71%;
-    --hero-to: 208 100% 66%;
+    /* Hero accent — dark theme uses an all-coral gradient. */
+    --hero-from: 16 100% 76%;
+    --hero-to: 4 92% 63%;
 
     --glass-bg: 240 8% 9%;
     --glass-opacity: 0.55;
@@ -104,14 +104,6 @@
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "ss01", "cv01", "tnum";
     text-rendering: optimizeLegibility;
-  }
-
-  body,
-  .theme-transition {
-    transition:
-      background-color 0.3s ease,
-      border-color 0.3s ease,
-      color 0.3s ease;
   }
 
   .tabular {

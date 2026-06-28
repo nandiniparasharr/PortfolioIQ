@@ -29,6 +29,7 @@ export type HoldingFormValues = z.infer<typeof holdingFormSchema>;
 
 /** Schema for the API request payload (an array of holdings). */
 export const analyzeRequestSchema = z.object({
+  currency: z.enum(["USD", "INR"]).default("INR"),
   holdings: z
     .array(
       z.object({

@@ -1,9 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Upload, FileWarning, Download, Loader2 } from "lucide-react";
+import { Upload, FileWarning, Loader2 } from "lucide-react";
 import { usePortfolioStore } from "@/store/portfolio";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { parseHoldingsFile } from "@/lib/import/parse-holdings";
 
@@ -44,18 +43,6 @@ export function CsvUpload() {
     } finally {
       setBusy(false);
     }
-  };
-
-  const downloadTemplate = () => {
-    const csv =
-      "Ticker,Quantity,Cost per share,Purchase date\nAAPL,60,150.00,2023-06-15\nMSFT,30,280.00,2023-08-01\nNVDA,40,65.00,2024-01-10\n";
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "portfolioiq-template.csv";
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   return (
@@ -106,18 +93,12 @@ export function CsvUpload() {
         />
       </div>
 
-      <div className="flex items-center justify-between gap-3">
-        <Button type="button" variant="ghost" size="sm" onClick={downloadTemplate}>
-          <Download className="h-3.5 w-3.5" />
-          Download template
-        </Button>
-        {result && (
-          <p className="text-2xs text-positive">
-            Imported {result.added} holding{result.added === 1 ? "" : "s"}
-            {result.skipped > 0 ? ` · ${result.skipped} row(s) skipped` : ""}
-          </p>
-        )}
-      </div>
+      {result && (
+        <p className="text-2xs text-positive">
+          Imported {result.added} holding{result.added === 1 ? "" : "s"}
+          {result.skipped > 0 ? ` · ${result.skipped} row(s) skipped` : ""}
+        </p>
+      )}
 
       {error && (
         <div className="flex items-start gap-2 rounded-md border border-negative/30 bg-negative/10 p-3 text-xs text-negative">

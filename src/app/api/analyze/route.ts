@@ -42,7 +42,12 @@ export async function POST(request: Request) {
       resolveBenchmark(),
     ]);
 
-    const analytics = computeAnalytics({ holdings, instruments, benchmarkHistory });
+    const analytics = computeAnalytics({
+      holdings,
+      instruments,
+      benchmarkHistory,
+      currency: parsed.data.currency,
+    });
     const commentary = await generateCommentary(analytics);
 
     return NextResponse.json({ analytics, commentary });

@@ -16,10 +16,17 @@ import {
   formatCurrency,
   formatPercent,
   formatSignedPercent,
+  type Currency,
 } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export function HoldingsTable({ positions }: { positions: ResolvedPosition[] }) {
+export function HoldingsTable({
+  positions,
+  currency,
+}: {
+  positions: ResolvedPosition[];
+  currency: Currency;
+}) {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: "weight", desc: true },
   ]);
@@ -67,7 +74,7 @@ export function HoldingsTable({ positions }: { positions: ResolvedPosition[] }) 
         meta: { align: "right" },
         cell: (ctx) => (
           <span className="tabular">
-            {formatCurrency(ctx.row.original.data.lastPrice, true)}
+            {formatCurrency(ctx.row.original.data.lastPrice, currency, true)}
           </span>
         ),
       },
@@ -78,7 +85,7 @@ export function HoldingsTable({ positions }: { positions: ResolvedPosition[] }) 
         meta: { align: "right" },
         cell: (ctx) => (
           <span className="tabular">
-            {formatCompactCurrency(ctx.row.original.marketValue)}
+            {formatCompactCurrency(ctx.row.original.marketValue, currency)}
           </span>
         ),
       },
@@ -110,7 +117,7 @@ export function HoldingsTable({ positions }: { positions: ResolvedPosition[] }) 
         },
       },
     ],
-    [],
+    [currency],
   );
 
   const table = useReactTable({

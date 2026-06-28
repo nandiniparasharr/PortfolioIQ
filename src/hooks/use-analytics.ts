@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import type { Holding, PortfolioAnalytics, PortfolioCommentary } from "@/types";
+import type { Currency } from "@/lib/format";
 
 interface AnalyzeResponse {
   analytics: PortfolioAnalytics;
@@ -14,7 +15,7 @@ type Status = "idle" | "loading" | "success" | "error";
  * Fetches deterministic analytics + commentary for a set of holdings.
  * Re-runs whenever the holdings signature changes.
  */
-export function useAnalytics(holdings: Holding[]) {
+export function useAnalytics(holdings: Holding[], currency: Currency) {
   const [status, setStatus] = React.useState<Status>("idle");
   const [data, setData] = React.useState<AnalyzeResponse | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -22,11 +23,12 @@ export function useAnalytics(holdings: Holding[]) {
   // Signature captures the inputs that affect the result.
   const signature = React.useMemo(
     () =>
+      `${currency}|` +
       holdings
         .map((h) => `${h.ticker}:${h.quantity}:${h.purchasePrice ?? ""}`)
         .sort()
         .join("|"),
-    [holdings],
+    [holdings, currency],
   );
 
   React.useEffect(() => {
@@ -42,7 +44,7 @@ export function useAnalytics(holdings: Holding[]) {
     fetch("/api/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ holdings }),
+      body: JSON.stringify({ holdings, currency }),
     })
       .then(async (res) => {
         if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error ?? "Request failed");

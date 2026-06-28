@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { Holding } from "@/types";
 import { createId } from "@/lib/utils";
+import { DEFAULT_CURRENCY, type Currency } from "@/lib/format";
 
 /**
  * Portfolio input state.
@@ -14,6 +15,9 @@ import { createId } from "@/lib/utils";
  */
 interface PortfolioState {
   holdings: Holding[];
+  /** Display currency for the whole session. */
+  currency: Currency;
+  setCurrency: (currency: Currency) => void;
   addHolding: (holding: Omit<Holding, "id">) => void;
   addHoldings: (holdings: Omit<Holding, "id">[]) => void;
   updateHolding: (id: string, patch: Partial<Omit<Holding, "id">>) => void;
@@ -49,6 +53,8 @@ export const usePortfolioStore = create<PortfolioState>()(
   persist(
     (set) => ({
       holdings: [],
+      currency: DEFAULT_CURRENCY,
+      setCurrency: (currency) => set({ currency }),
       addHolding: (holding) =>
         set((state) => ({
           holdings: upsert(state.holdings, { ...holding, id: createId() }),

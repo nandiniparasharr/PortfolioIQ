@@ -182,13 +182,17 @@ async function readCsv(file: File): Promise<unknown[][]> {
   return parsed.data;
 }
 
-async function readExcel(buffer: ArrayBuffer): Promise<unknown[][]> {
+interface SheetGrid {
+  name: string;
+  grid: unknown[][];
+}
+
+async function readExcelSheets(buffer: ArrayBuffer): Promise<SheetGrid[]> {
   // Loaded on demand so the (large) spreadsheet parser stays out of the
   // initial bundle and is only fetched when an Excel file is imported.
   const XLSX = await import("xlsx");
   const workbook = XLSX.read(buffer, { type: "array", cellDates: true });
-  // Choose the sheet whose header detection succeeds, else the largest.
-  let best: { grid: unknown[][]; score: number } | null = null;
+  const sheets: SheetGrid[] = [];
   for (const name of workbook.SheetNames) {
     const sheet = workbook.Sheets[name];
     if (!sheet) continue;
@@ -198,23 +202,61 @@ async function readExcel(buffer: ArrayBuffer): Promise<unknown[][]> {
       defval: "",
       blankrows: false,
     });
-    const detectable = detectHeader(grid) ? 1_000_000 : 0;
-    const score = detectable + grid.length;
-    if (!best || score > best.score) best = { grid, score };
+    sheets.push({ name, grid });
   }
-  return best?.grid ?? [];
+  return sheets;
+}
+
+/** Sheet names that denote an already-consolidated holdings tab. */
+const COMBINED_SHEET_RE = /combined|consolidat|overall|all\s*holdings/i;
+
+/**
+ * Build holdings from a multi-sheet workbook.
+ *   - If a sheet looks "combined/consolidated", use only that sheet (avoids
+ *     double-counting positions that also appear on per-category tabs).
+ *   - Otherwise, merge holdings from every sheet that contains a table, so
+ *     separate tabs (e.g. "Equity" + "Mutual Funds") are all included.
+ */
+function holdingsFromSheets(sheets: SheetGrid[]): ParseOutcome {
+  const withTable = sheets.filter((s) => detectHeader(s.grid) !== null);
+  if (withTable.length === 0) {
+    return {
+      holdings: [],
+      skipped: 0,
+      headerRow: null,
+      error:
+        "Couldn't find a holdings table in any sheet. Make sure a sheet has columns for ticker/symbol, quantity and cost per share.",
+    };
+  }
+
+  const combined = withTable.find((s) => COMBINED_SHEET_RE.test(s.name));
+  if (combined) return gridToHoldings(combined.grid);
+
+  const merged: ParsedHolding[] = [];
+  let skipped = 0;
+  let firstHeader: number | null = null;
+  for (const s of withTable) {
+    const out = gridToHoldings(s.grid);
+    if (firstHeader === null) firstHeader = out.headerRow;
+    merged.push(...out.holdings);
+    skipped += out.skipped;
+  }
+  return { holdings: merged, skipped, headerRow: firstHeader };
 }
 
 /** Parse a user-supplied file into holdings. */
 export async function parseHoldingsFile(file: File): Promise<ParseOutcome> {
   const name = file.name.toLowerCase();
   try {
-    let grid: unknown[][];
     if (name.endsWith(".xlsx") || name.endsWith(".xls") || name.endsWith(".xlsm")) {
-      grid = await readExcel(await file.arrayBuffer());
-    } else {
-      grid = await readCsv(file);
+      const sheets = await readExcelSheets(await file.arrayBuffer());
+      if (sheets.length === 0 || sheets.every((s) => s.grid.length === 0)) {
+        return { holdings: [], skipped: 0, headerRow: null, error: "The file appears to be empty." };
+      }
+      return holdingsFromSheets(sheets);
     }
+
+    const grid = await readCsv(file);
     if (grid.length === 0) {
       return { holdings: [], skipped: 0, headerRow: null, error: "The file appears to be empty." };
     }

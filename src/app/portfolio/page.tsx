@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { HoldingForm } from "@/components/portfolio/holding-form";
 import { CsvUpload } from "@/components/portfolio/csv-upload";
 import { HoldingsEditor } from "@/components/portfolio/holdings-editor";
+import { CurrencyToggle } from "@/components/portfolio/currency-toggle";
 import { usePortfolioStore } from "@/store/portfolio";
 import { SAMPLE_PORTFOLIO } from "@/lib/sample-portfolio";
 
@@ -53,7 +54,8 @@ export default function PortfolioPage() {
               browser for this session — nothing is uploaded or stored.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <CurrencyToggle />
             <Button variant="outline" size="sm" onClick={loadSample}>
               <Sparkles className="h-3.5 w-3.5" />
               Load sample
