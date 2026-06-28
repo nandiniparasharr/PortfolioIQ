@@ -5,17 +5,25 @@ import { syntheticBenchmark, syntheticInstrument } from "./synthetic";
 /**
  * Server-side market-data orchestrator.
  *
- * Responsibilities:
- *   - select the configured provider (synthetic by default, Yahoo if enabled);
- *   - cache resolved instruments in-process with a TTL;
- *   - apply a light concurrency limit so a large portfolio cannot fan out into
- *     a burst of upstream requests;
- *   - fall back to the synthetic provider on any upstream failure so a single
- *     bad ticker never fails the whole request.
+ * Pricing priority per position:
+ *   1. user-supplied current price (most authoritative)
+ *   2. a live quote from Yahoo (real market price), when reachable
+ *   3. the cost basis (shown "at cost" — never a fabricated figure)
+ *
+ * Only the latest price is fetched live; the synthetic price *history* still
+ * drives the date-aligned time-series analytics. Results are cached in-process
+ * and a circuit breaker disables live fetches for a minute after a network
+ * failure so a blocked/unreachable upstream doesn't slow every request.
  */
 
 const TTL_MS = 1000 * 60 * 30; // 30 minutes
 const MAX_CONCURRENCY = 4;
+const BREAKER_MS = 60 * 1000;
+
+export interface PriceHint {
+  current?: number;
+  cost?: number;
+}
 
 interface CacheEntry {
   data: InstrumentData;
@@ -23,49 +31,77 @@ interface CacheEntry {
 }
 
 const cache = new Map<string, CacheEntry>();
+let liveDisabledUntil = 0;
 
-function isYahooEnabled(): boolean {
-  return (process.env.MARKET_DATA_PROVIDER ?? "synthetic").toLowerCase() === "yahoo";
+function isLivePricingEnabled(): boolean {
+  // Live by default; set MARKET_DATA_PROVIDER=synthetic to force offline data.
+  return (process.env.MARKET_DATA_PROVIDER ?? "live").toLowerCase() !== "synthetic";
+}
+
+/** Candidate Yahoo symbols for a ticker, given the display currency. */
+function symbolCandidates(ticker: string, currency?: string): string[] {
+  const t = ticker.toUpperCase();
+  if (currency === "INR") {
+    const base = t.split(/[-\s/]/)[0]!; // strip suffixes like "-RR", "-IV"
+    return Array.from(new Set([`${t}.NS`, `${base}.NS`, `${t}.BO`, `${base}.BO`]));
+  }
+  return [t];
+}
+
+/** Try to resolve a live price; trips the breaker on a network failure. */
+async function fetchLivePrice(ticker: string, currency?: string): Promise<number | null> {
+  if (Date.now() < liveDisabledUntil) return null;
+  const { fetchYahooPrice } = await import("./yahoo");
+  for (const symbol of symbolCandidates(ticker, currency)) {
+    try {
+      const price = await fetchYahooPrice(symbol);
+      if (price) return price;
+    } catch {
+      liveDisabledUntil = Date.now() + BREAKER_MS;
+      return null;
+    }
+  }
+  return null;
 }
 
 async function resolveOne(
   ticker: string,
-  anchorPrice?: number,
+  hint: PriceHint | undefined,
   currency?: string,
 ): Promise<InstrumentData> {
   const symbol = ticker.toUpperCase();
-  // The anchor (cost basis) and currency affect the modeled instrument, so
-  // they are part of the cache key.
-  const cacheKey = `${symbol}|${anchorPrice ?? ""}|${currency ?? ""}`;
+
+  // Determine the anchor (current) price by priority.
+  let anchor = hint?.current;
+  let source = anchor != null ? "user" : "";
+  if (anchor == null && isLivePricingEnabled()) {
+    const live = await fetchLivePrice(symbol, currency);
+    if (live != null) {
+      anchor = live;
+      source = "live";
+    }
+  }
+  if (anchor == null) {
+    anchor = hint?.cost;
+    source = "cost";
+  }
+
+  const cacheKey = `${symbol}|${anchor ?? ""}|${source}|${currency ?? ""}`;
   const cached = cache.get(cacheKey);
   if (cached && cached.expires > Date.now()) return cached.data;
 
-  let data: InstrumentData;
-  if (isYahooEnabled()) {
-    try {
-      const { fetchYahooInstrument } = await import("./yahoo");
-      data = await fetchYahooInstrument(symbol);
-      if (data.history.length < 30) data = syntheticInstrument(symbol, anchorPrice, currency);
-    } catch {
-      data = syntheticInstrument(symbol, anchorPrice, currency);
-    }
-  } else {
-    data = syntheticInstrument(symbol, anchorPrice, currency);
-  }
-
+  const data = syntheticInstrument(symbol, anchor, currency);
   cache.set(cacheKey, { data, expires: Date.now() + TTL_MS });
   return data;
 }
 
 /**
  * Resolve a batch of tickers with bounded concurrency.
- * `priceHints` maps a ticker to the user's cost basis so the synthetic provider
- * can anchor modeled prices to it (keeping unrealized P&L realistic).
- * `currency` lets the synthetic provider set geography sensibly (e.g. INR → India).
+ * `priceHints` carries each position's user-supplied current price and cost.
  */
 export async function resolveInstruments(
   tickers: string[],
-  priceHints?: Record<string, number>,
+  priceHints?: Record<string, PriceHint>,
   currency?: string,
 ): Promise<Record<string, InstrumentData>> {
   const unique = Array.from(new Set(tickers.map((t) => t.toUpperCase())));
@@ -84,14 +120,7 @@ export async function resolveInstruments(
 }
 
 export async function resolveBenchmark(): Promise<{ date: string; close: number }[]> {
-  if (isYahooEnabled()) {
-    try {
-      const { fetchYahooBenchmark } = await import("./yahoo");
-      const data = await fetchYahooBenchmark();
-      if (data.length >= 30) return data;
-    } catch {
-      // fall through to synthetic
-    }
-  }
+  // The benchmark stays synthetic so its dates align with the synthetic
+  // instrument histories used by the analytics engine.
   return syntheticBenchmark();
 }

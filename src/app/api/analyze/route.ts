@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { analyzeRequestSchema } from "@/lib/validation";
-import { resolveBenchmark, resolveInstruments } from "@/lib/market/provider";
+import { resolveBenchmark, resolveInstruments, type PriceHint } from "@/lib/market/provider";
 import { computeAnalytics } from "@/lib/analytics/engine";
 import { generateCommentary } from "@/lib/ai/commentary";
 import type { Holding } from "@/types";
@@ -37,15 +37,14 @@ export async function POST(request: Request) {
 
   try {
     const tickers = holdings.map((h) => h.ticker);
-    // Anchor modeled prices to each position's cost basis (keeps value &
-    // unrealized P&L realistic when live data isn't available).
-    const priceHints: Record<string, number> = {};
+    // Pass each position's user-supplied current price and cost basis. The
+    // provider resolves the price by priority: user price → live quote → cost.
+    const priceHints: Record<string, PriceHint> = {};
     for (const h of holdings) {
-      // Prefer the user-supplied current price; otherwise show at cost basis.
-      const anchor = h.currentPrice ?? h.purchasePrice;
-      if (anchor && anchor > 0) {
-        priceHints[h.ticker.toUpperCase()] = anchor;
-      }
+      priceHints[h.ticker.toUpperCase()] = {
+        current: h.currentPrice,
+        cost: h.purchasePrice,
+      };
     }
     const [instruments, benchmarkHistory] = await Promise.all([
       resolveInstruments(tickers, priceHints, parsed.data.currency),

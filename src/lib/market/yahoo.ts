@@ -1,146 +1,44 @@
 import "server-only";
-import type { InstrumentData, InstrumentMeta, PricePoint } from "@/types";
-import { bucketForMarketCap } from "./instruments";
-import type { Region, Sector } from "@/types";
 
 /**
- * Live market-data provider backed by Yahoo Finance.
+ * Lightweight live-quote fetch.
  *
- * Loaded lazily and only on the server. Any failure is surfaced to the caller,
- * which is responsible for falling back to the synthetic provider so the app
- * never hard-fails on a flaky upstream.
+ * We deliberately fetch ONLY the latest price (not full history) via Yahoo's
+ * public chart endpoint, which needs no cookie/crumb auth. The price is used to
+ * anchor the modeled instrument so market value and unrealized P&L are real,
+ * while the synthetic price history continues to drive the (date-aligned)
+ * time-series analytics. Any failure returns null / throws so the caller can
+ * fall back to the user's cost basis.
  */
 
-const SECTOR_MAP: Record<string, Sector> = {
-  "Technology": "Information Technology",
-  "Financial Services": "Financials",
-  "Financial": "Financials",
-  "Healthcare": "Health Care",
-  "Consumer Cyclical": "Consumer Discretionary",
-  "Consumer Defensive": "Consumer Staples",
-  "Communication Services": "Communication Services",
-  "Industrials": "Industrials",
-  "Energy": "Energy",
-  "Utilities": "Utilities",
-  "Real Estate": "Real Estate",
-  "Basic Materials": "Materials",
-};
+const TIMEOUT_MS = 4500;
 
-const REGION_BY_COUNTRY: Record<string, Region> = {
-  "United States": "North America",
-  "Canada": "North America",
-  "Mexico": "Latin America",
-  "Brazil": "Latin America",
-  "United Kingdom": "Europe",
-  "Germany": "Europe",
-  "France": "Europe",
-  "Netherlands": "Europe",
-  "Switzerland": "Europe",
-  "China": "Asia Pacific",
-  "Japan": "Asia Pacific",
-  "Taiwan": "Asia Pacific",
-  "India": "Asia Pacific",
-  "Australia": "Asia Pacific",
-};
-
-function mapSector(raw?: string): Sector {
-  if (!raw) return "Unknown";
-  return SECTOR_MAP[raw] ?? "Unknown";
-}
-
-function mapRegion(country?: string): Region {
-  if (!country) return "Unknown";
-  return REGION_BY_COUNTRY[country] ?? "Unknown";
-}
-
-/** Minimal surface of yahoo-finance2 used here, to avoid its broad union types. */
-interface YahooQuote {
-  date: string | number | Date;
-  close?: number | null;
-}
-interface YahooProfile {
-  country?: string;
-  sector?: string;
-  industry?: string;
-}
-interface YahooPrice {
-  longName?: string;
-  shortName?: string;
+interface ChartMeta {
   regularMarketPrice?: number;
-  marketCap?: number;
+  chartPreviousClose?: number;
   currency?: string;
 }
-interface YahooClient {
-  quoteSummary: (
-    symbol: string,
-    opts: { modules: string[] },
-  ) => Promise<{ price?: YahooPrice; summaryProfile?: YahooProfile; assetProfile?: YahooProfile }>;
-  chart: (
-    symbol: string,
-    opts: { period1: Date; interval: string },
-  ) => Promise<{ quotes?: YahooQuote[] }>;
-}
 
-async function loadYahoo(): Promise<YahooClient> {
-  const mod = await import("yahoo-finance2");
-  return (mod.default ?? mod) as unknown as YahooClient;
-}
+/**
+ * Fetch the latest price for an exact symbol (e.g. "ITC.NS").
+ * Returns the price, or null when the symbol is unknown / has no price.
+ * Throws on a network/timeout failure so the caller can trip a circuit breaker.
+ */
+export async function fetchYahooPrice(symbol: string): Promise<number | null> {
+  const url =
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}` +
+    `?interval=1d&range=5d`;
 
-export async function fetchYahooInstrument(ticker: string): Promise<InstrumentData> {
-  const yahooFinance = await loadYahoo();
-  const symbol = ticker.toUpperCase();
+  const res = await fetch(url, {
+    headers: { "User-Agent": "Mozilla/5.0" },
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  });
+  if (!res.ok) return null; // unknown symbol (404 etc.) — not a network failure
 
-  const period1 = new Date();
-  period1.setFullYear(period1.getFullYear() - 3);
-
-  const [quote, chart] = await Promise.all([
-    yahooFinance.quoteSummary(symbol, {
-      modules: ["price", "summaryProfile", "assetProfile"],
-    }),
-    yahooFinance.chart(symbol, { period1, interval: "1d" }),
-  ]);
-
-  const profile = quote.summaryProfile ?? quote.assetProfile;
-  const price = quote.price;
-  const country = profile?.country;
-
-  const history: PricePoint[] = (chart.quotes ?? [])
-    .filter((q) => q.close != null && q.date != null)
-    .map((q) => ({
-      date: new Date(q.date).toISOString().slice(0, 10),
-      close: Number(q.close),
-    }));
-
-  const lastPrice: number =
-    history.at(-1)?.close ?? Number(price?.regularMarketPrice ?? 0);
-  const marketCap = Number(price?.marketCap ?? 0);
-
-  const meta: InstrumentMeta = {
-    ticker: symbol,
-    name: price?.longName ?? price?.shortName ?? symbol,
-    sector: mapSector(profile?.sector),
-    industry: profile?.industry ?? "Unknown",
-    region: mapRegion(country),
-    country: country ?? "Unknown",
-    marketCap,
-    marketCapBucket: bucketForMarketCap(marketCap),
-    currency: price?.currency ?? "USD",
+  const json = (await res.json()) as {
+    chart?: { result?: { meta?: ChartMeta }[] };
   };
-
-  return { meta, lastPrice, history };
-}
-
-export async function fetchYahooBenchmark(): Promise<
-  { date: string; close: number }[]
-> {
-  const yahooFinance = await loadYahoo();
-  const period1 = new Date();
-  period1.setFullYear(period1.getFullYear() - 3);
-  const chart = await yahooFinance.chart("^GSPC", { period1, interval: "1d" });
-  return (chart.quotes ?? [])
-    .filter((q) => q.close != null && q.date != null)
-    .map((q) => ({
-      date: new Date(q.date).toISOString().slice(0, 10),
-      close: Number(q.close),
-    }));
+  const meta = json?.chart?.result?.[0]?.meta;
+  const price = meta?.regularMarketPrice ?? meta?.chartPreviousClose;
+  return typeof price === "number" && price > 0 ? price : null;
 }

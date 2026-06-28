@@ -29,7 +29,6 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "xlsx": "^0.18.5",
-    "yahoo-finance2": "^2.13.3",
     "zod": "^3.24.1",
     "zustand": "^5.0.2"
   },
