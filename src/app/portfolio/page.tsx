@@ -15,20 +15,7 @@ import { HoldingForm } from "@/components/portfolio/holding-form";
 import { CsvUpload } from "@/components/portfolio/csv-upload";
 import { HoldingsEditor } from "@/components/portfolio/holdings-editor";
 import { usePortfolioStore } from "@/store/portfolio";
-
-/** A diversified sample book for instant exploration. */
-const SAMPLE: { ticker: string; quantity: number; purchasePrice: number }[] = [
-  { ticker: "AAPL", quantity: 60, purchasePrice: 150 },
-  { ticker: "MSFT", quantity: 30, purchasePrice: 280 },
-  { ticker: "NVDA", quantity: 40, purchasePrice: 65 },
-  { ticker: "JPM", quantity: 50, purchasePrice: 145 },
-  { ticker: "JNJ", quantity: 45, purchasePrice: 160 },
-  { ticker: "XOM", quantity: 70, purchasePrice: 95 },
-  { ticker: "PG", quantity: 40, purchasePrice: 145 },
-  { ticker: "NEE", quantity: 80, purchasePrice: 70 },
-  { ticker: "TSM", quantity: 55, purchasePrice: 95 },
-  { ticker: "HD", quantity: 15, purchasePrice: 300 },
-];
+import { SAMPLE_PORTFOLIO } from "@/lib/sample-portfolio";
 
 export default function PortfolioPage() {
   const holdings = usePortfolioStore((s) => s.holdings);
@@ -37,7 +24,7 @@ export default function PortfolioPage() {
 
   const loadSample = () => {
     clear();
-    addHoldings(SAMPLE);
+    addHoldings(SAMPLE_PORTFOLIO);
   };
 
   return (

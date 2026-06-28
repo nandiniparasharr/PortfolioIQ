@@ -13,21 +13,24 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   description: string;
+  /** When true, the item is locked until at least one holding exists. */
+  requiresPortfolio?: boolean;
 }
 
-/** Primary navigation. Future modules (DCF, screener, factor models) slot in here. */
+/** Primary navigation. */
 export const PRIMARY_NAV: NavItem[] = [
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-    description: "Executive analytics overview",
-  },
   {
     label: "Portfolio",
     href: "/portfolio",
     icon: Wallet,
     description: "Holdings input & management",
+  },
+  {
+    label: "Analytics",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+    description: "Executive analytics overview",
+    requiresPortfolio: true,
   },
 ];
 

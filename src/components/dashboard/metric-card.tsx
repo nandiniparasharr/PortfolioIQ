@@ -15,7 +15,7 @@ export function MetricCard({
   tone?: MetricTone;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <div className="glass glass-hover rounded-lg p-4">
       <div className="text-2xs font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </div>

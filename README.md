@@ -35,10 +35,18 @@ trading app.
 ## Features
 
 **Portfolio input**
-- Manual holding entry with ticker autocomplete and validation
-- CSV import with flexible header mapping (broker-export friendly)
+- Manual holding entry with ticker autocomplete and validation (ticker,
+  quantity and cost per share are required)
+- CSV / TSV / Excel (.xlsx, .xls) import with automatic table detection and
+  fuzzy header matching — the table need not start on row 1, and column labels
+  are matched loosely (broker-export friendly)
 - Inline editing, weighted-average position merging, sample portfolio
 - Session-only persistence (sessionStorage) — no account, no database
+
+**Experience**
+- Light / dark theme toggle (institutional graphite ↔ paper-white)
+- Liquid-glass surfaces, animated aurora hero and subtle motion
+- Analytics view stays locked until at least one holding is added
 
 **Analytics**
 - Asset, sector, geographic and market-cap allocation
@@ -263,18 +271,14 @@ src/
 
 ## Future roadmap
 
-The architecture anticipates additional analytics modules that slot in without
-refactoring (new route + engine module + nav entry):
+The architecture is deliberately modular so additional analytics can be added
+as a new route + engine module without refactoring. These are intentionally not
+surfaced as "coming soon" placeholders in the UI — they are documented direction
+only:
 
-- DCF valuation engine
-- Comparable-company analysis
-- Financial-statement analyzer
-- Earnings-call transcript analyzer
-- Stock screener & watchlist analytics
-- Monte Carlo portfolio simulator
 - Factor-exposure / multi-factor risk model
-- Economic dashboard
-- ESG analysis
+- Monte Carlo portfolio simulator
+- DCF valuation engine
 
 ---
 

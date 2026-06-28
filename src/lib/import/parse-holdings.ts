@@ -1,0 +1,230 @@
+import Papa from "papaparse";
+
+/**
+ * Robust holdings import for CSV, TSV and Excel (.xlsx/.xls) files.
+ *
+ * The parser does NOT assume the table starts at row 1 or uses exact headers.
+ * It loads the file into a 2-D grid of cells, scans the first rows to locate
+ * the header (the first row that maps to at least a ticker and quantity
+ * column), then reads the rows beneath it. Column matching is fuzzy, so common
+ * broker / spreadsheet exports import without reformatting.
+ *
+ * Cost per share is REQUIRED: rows missing a positive price are skipped.
+ */
+
+export interface ParsedHolding {
+  ticker: string;
+  quantity: number;
+  purchasePrice: number;
+  purchaseDate?: string;
+}
+
+export interface ParseOutcome {
+  holdings: ParsedHolding[];
+  skipped: number;
+  /** Zero-based index of the detected header row, for user feedback. */
+  headerRow: number | null;
+  error?: string;
+}
+
+type Field = "ticker" | "quantity" | "purchasePrice" | "purchaseDate";
+
+/** Substrings that, if present in a normalized header, map it to a field. */
+const FIELD_MATCHERS: Record<Field, string[]> = {
+  ticker: ["ticker", "symbol", "stock", "security", "instrument"],
+  quantity: ["quantity", "shares", "qty", "units", "position", "noofshares", "numberofshares"],
+  purchasePrice: ["price", "cost", "basis", "paid", "avgcost", "averageprice", "buyprice"],
+  purchaseDate: ["date", "acquired", "purchased", "tradedate", "buydate"],
+};
+
+const normalize = (s: unknown): string =>
+  String(s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+function matchField(header: string): Field | null {
+  const n = normalize(header);
+  if (!n) return null;
+  // Date must win over price for "purchasedate" vs "purchaseprice".
+  for (const sub of FIELD_MATCHERS.purchaseDate) if (n.includes(sub)) return "purchaseDate";
+  for (const sub of FIELD_MATCHERS.ticker) if (n.includes(sub)) return "ticker";
+  for (const sub of FIELD_MATCHERS.quantity) if (n.includes(sub)) return "quantity";
+  for (const sub of FIELD_MATCHERS.purchasePrice) if (n.includes(sub)) return "purchasePrice";
+  return null;
+}
+
+/** Map a candidate header row to column indices. */
+function mapHeaderRow(row: unknown[]): Partial<Record<Field, number>> {
+  const map: Partial<Record<Field, number>> = {};
+  row.forEach((cell, i) => {
+    const field = matchField(cell as string);
+    // First match wins so we don't overwrite an earlier, better column.
+    if (field && map[field] === undefined) map[field] = i;
+  });
+  return map;
+}
+
+/** Find the header row: first row (within the top 25) resolving ticker+qty. */
+function detectHeader(grid: unknown[][]): {
+  index: number;
+  columns: Partial<Record<Field, number>>;
+} | null {
+  const limit = Math.min(grid.length, 25);
+  for (let r = 0; r < limit; r++) {
+    const columns = mapHeaderRow(grid[r] ?? []);
+    if (columns.ticker !== undefined && columns.quantity !== undefined) {
+      return { index: r, columns };
+    }
+  }
+  return null;
+}
+
+function toNumber(value: unknown): number {
+  if (typeof value === "number") return value;
+  const cleaned = String(value ?? "").replace(/[$£€,\s]/g, "");
+  return Number(cleaned);
+}
+
+const TICKER_RE = /^[A-Za-z][A-Za-z0-9.\-]{0,11}$/;
+
+/** Normalize a variety of date inputs to ISO yyyy-mm-dd, else undefined. */
+function normalizeDate(value: unknown): string | undefined {
+  if (value == null || value === "") return undefined;
+  const raw = String(value).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+
+  // M/D/YYYY or D/M/YYYY style — assume US M/D/YYYY.
+  const slash = raw.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})$/);
+  if (slash) {
+    const [, m, d, rawYear] = slash;
+    const year = rawYear!.length === 2 ? `20${rawYear}` : rawYear!;
+    const month = m!.padStart(2, "0");
+    const day = d!.padStart(2, "0");
+    if (Number(month) <= 12 && Number(day) <= 31) return `${year}-${month}-${day}`;
+  }
+
+  const parsed = new Date(raw);
+  if (!Number.isNaN(parsed.getTime())) {
+    const year = parsed.getFullYear();
+    if (year >= 1970 && year <= 2100) return parsed.toISOString().slice(0, 10);
+  }
+  return undefined;
+}
+
+/** Convert a detected grid + header mapping into holdings. */
+function gridToHoldings(grid: unknown[][]): ParseOutcome {
+  const header = detectHeader(grid);
+  if (!header) {
+    return {
+      holdings: [],
+      skipped: 0,
+      headerRow: null,
+      error:
+        "Couldn't find a holdings table. Make sure the file has columns for ticker/symbol, quantity and cost per share.",
+    };
+  }
+
+  const { columns } = header;
+  if (columns.purchasePrice === undefined) {
+    return {
+      holdings: [],
+      skipped: 0,
+      headerRow: header.index,
+      error:
+        "Cost per share is required, but no price/cost column was found. Add a 'Cost per share' (or 'Price') column.",
+    };
+  }
+
+  const holdings: ParsedHolding[] = [];
+  let skipped = 0;
+
+  for (let r = header.index + 1; r < grid.length; r++) {
+    const row = grid[r] ?? [];
+    if (row.every((c) => String(c ?? "").trim() === "")) continue; // blank row
+
+    const ticker = String(row[columns.ticker!] ?? "").trim().toUpperCase();
+    const quantity = toNumber(row[columns.quantity!]);
+    const price = toNumber(row[columns.purchasePrice!]);
+
+    if (!TICKER_RE.test(ticker) || !Number.isFinite(quantity) || quantity <= 0) {
+      skipped++;
+      continue;
+    }
+    if (!Number.isFinite(price) || price <= 0) {
+      skipped++; // cost per share is required
+      continue;
+    }
+
+    holdings.push({
+      ticker,
+      quantity,
+      purchasePrice: price,
+      purchaseDate:
+        columns.purchaseDate !== undefined
+          ? normalizeDate(row[columns.purchaseDate])
+          : undefined,
+    });
+  }
+
+  if (holdings.length === 0 && !skipped) {
+    return {
+      holdings,
+      skipped,
+      headerRow: header.index,
+      error: "No data rows were found beneath the detected header.",
+    };
+  }
+
+  return { holdings, skipped, headerRow: header.index };
+}
+
+async function readCsv(file: File): Promise<unknown[][]> {
+  const text = await file.text();
+  const parsed = Papa.parse<string[]>(text, { skipEmptyLines: false });
+  return parsed.data;
+}
+
+async function readExcel(buffer: ArrayBuffer): Promise<unknown[][]> {
+  // Loaded on demand so the (large) spreadsheet parser stays out of the
+  // initial bundle and is only fetched when an Excel file is imported.
+  const XLSX = await import("xlsx");
+  const workbook = XLSX.read(buffer, { type: "array", cellDates: true });
+  // Choose the sheet whose header detection succeeds, else the largest.
+  let best: { grid: unknown[][]; score: number } | null = null;
+  for (const name of workbook.SheetNames) {
+    const sheet = workbook.Sheets[name];
+    if (!sheet) continue;
+    const grid = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
+      header: 1,
+      raw: false,
+      defval: "",
+      blankrows: false,
+    });
+    const detectable = detectHeader(grid) ? 1_000_000 : 0;
+    const score = detectable + grid.length;
+    if (!best || score > best.score) best = { grid, score };
+  }
+  return best?.grid ?? [];
+}
+
+/** Parse a user-supplied file into holdings. */
+export async function parseHoldingsFile(file: File): Promise<ParseOutcome> {
+  const name = file.name.toLowerCase();
+  try {
+    let grid: unknown[][];
+    if (name.endsWith(".xlsx") || name.endsWith(".xls") || name.endsWith(".xlsm")) {
+      grid = await readExcel(await file.arrayBuffer());
+    } else {
+      grid = await readCsv(file);
+    }
+    if (grid.length === 0) {
+      return { holdings: [], skipped: 0, headerRow: null, error: "The file appears to be empty." };
+    }
+    return gridToHoldings(grid);
+  } catch {
+    return {
+      holdings: [],
+      skipped: 0,
+      headerRow: null,
+      error: "Could not read the file. Supported formats: CSV, TSV, XLSX, XLS.",
+    };
+  }
+}

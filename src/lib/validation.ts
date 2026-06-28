@@ -13,9 +13,10 @@ export const holdingFormSchema = z.object({
     .number({ invalid_type_error: "Quantity must be a number" })
     .positive("Quantity must be greater than zero")
     .finite(),
-  purchasePrice: z
-    .union([z.coerce.number().positive().finite(), z.literal("").transform(() => undefined)])
-    .optional(),
+  purchasePrice: z.coerce
+    .number({ invalid_type_error: "Cost per share is required" })
+    .positive("Cost per share must be greater than zero")
+    .finite(),
   purchaseDate: z
     .string()
     .trim()

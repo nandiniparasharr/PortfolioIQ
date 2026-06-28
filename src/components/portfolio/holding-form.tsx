@@ -23,7 +23,7 @@ export function HoldingForm() {
     formState: { errors },
   } = useForm<HoldingFormValues>({
     resolver: zodResolver(holdingFormSchema),
-    defaultValues: { ticker: "", quantity: undefined, purchasePrice: undefined, purchaseDate: "" },
+    defaultValues: { ticker: "", quantity: undefined, purchasePrice: undefined, purchaseDate: "" } as Partial<HoldingFormValues> as HoldingFormValues,
   });
 
   const onSubmit = (values: HoldingFormValues) => {
@@ -71,7 +71,7 @@ export function HoldingForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="purchasePrice">Purchase price (optional)</Label>
+          <Label htmlFor="purchasePrice">Cost per share</Label>
           <Input
             id="purchasePrice"
             type="number"

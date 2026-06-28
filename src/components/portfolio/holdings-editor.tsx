@@ -5,6 +5,7 @@ import { Trash2, Inbox } from "lucide-react";
 import { usePortfolioStore } from "@/store/portfolio";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 /** Inline-editable list of current holdings. */
 export function HoldingsEditor() {
@@ -32,7 +33,7 @@ export function HoldingsEditor() {
           <tr className="border-b border-border bg-surface-muted text-2xs uppercase tracking-wide text-muted-foreground">
             <th className="px-4 py-2.5 text-left font-medium">Ticker</th>
             <th className="px-4 py-2.5 text-right font-medium">Quantity</th>
-            <th className="px-4 py-2.5 text-right font-medium">Cost / Share</th>
+            <th className="px-4 py-2.5 text-right font-medium">Cost / Share *</th>
             <th className="px-4 py-2.5 text-right font-medium">Date</th>
             <th className="w-12 px-4 py-2.5" />
           </tr>
@@ -59,13 +60,17 @@ export function HoldingsEditor() {
                   type="number"
                   step="any"
                   value={h.purchasePrice ?? ""}
-                  placeholder="—"
+                  placeholder="0.00"
                   onChange={(e) =>
                     updateHolding(h.id, {
                       purchasePrice: e.target.value ? Number(e.target.value) : undefined,
                     })
                   }
-                  className="h-8 w-28 ml-auto text-right tabular"
+                  className={cn(
+                    "h-8 w-28 ml-auto text-right tabular",
+                    (h.purchasePrice == null || h.purchasePrice <= 0) &&
+                      "border-warning/50",
+                  )}
                 />
               </td>
               <td className="px-2 py-1.5 text-right">

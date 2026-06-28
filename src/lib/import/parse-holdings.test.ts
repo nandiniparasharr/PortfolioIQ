@@ -1,0 +1,76 @@
+import { describe, it, expect } from "vitest";
+import { parseHoldingsFile } from "./parse-holdings";
+
+function csvFile(content: string, name = "holdings.csv"): File {
+  return new File([content], name, { type: "text/csv" });
+}
+
+describe("parseHoldingsFile (CSV)", () => {
+  it("detects a header that is not on the first row", async () => {
+    const csv = [
+      "My Brokerage Export",
+      "Generated 2024-01-01",
+      "",
+      "Symbol,Shares,Cost per share,Trade Date",
+      "AAPL,60,150.00,2023-06-15",
+      "MSFT,30,280.00,08/01/2023",
+    ].join("\n");
+
+    const out = await parseHoldingsFile(csvFile(csv));
+    expect(out.error).toBeUndefined();
+    expect(out.headerRow).toBe(3);
+    expect(out.holdings).toHaveLength(2);
+    expect(out.holdings[0]).toEqual({
+      ticker: "AAPL",
+      quantity: 60,
+      purchasePrice: 150,
+      purchaseDate: "2023-06-15",
+    });
+    // US-style date is normalized to ISO.
+    expect(out.holdings[1]!.purchaseDate).toBe("2023-08-01");
+  });
+
+  it("matches fuzzy, differently-ordered headers and currency symbols", async () => {
+    const csv = [
+      "Avg Cost,Ticker Symbol,Qty",
+      "$98.50,BRK.B,3",
+      '"$1,234.50",GOOGL,1',
+    ].join("\n");
+    const out = await parseHoldingsFile(csvFile(csv));
+    expect(out.holdings).toHaveLength(2);
+    expect(out.holdings[0]).toMatchObject({
+      ticker: "BRK.B",
+      quantity: 3,
+      purchasePrice: 98.5,
+    });
+    // Quoted thousands separator is handled.
+    expect(out.holdings[1]!.purchasePrice).toBe(1234.5);
+  });
+
+  it("skips rows that are missing the required cost per share", async () => {
+    const csv = [
+      "ticker,quantity,price",
+      "AAPL,10,150",
+      "MSFT,5,", // no price -> skipped
+      "GOOGL,2,170",
+    ].join("\n");
+    const out = await parseHoldingsFile(csvFile(csv));
+    expect(out.holdings).toHaveLength(2);
+    expect(out.skipped).toBe(1);
+    expect(out.holdings.map((h) => h.ticker)).toEqual(["AAPL", "GOOGL"]);
+  });
+
+  it("errors clearly when no price column exists", async () => {
+    const csv = ["ticker,quantity", "AAPL,10"].join("\n");
+    const out = await parseHoldingsFile(csvFile(csv));
+    expect(out.holdings).toHaveLength(0);
+    expect(out.error).toMatch(/cost per share is required/i);
+  });
+
+  it("errors when no holdings table can be found", async () => {
+    const csv = ["just some notes", "no table here"].join("\n");
+    const out = await parseHoldingsFile(csvFile(csv));
+    expect(out.holdings).toHaveLength(0);
+    expect(out.error).toMatch(/couldn't find a holdings table/i);
+  });
+});
