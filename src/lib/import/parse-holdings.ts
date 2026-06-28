@@ -17,6 +17,7 @@ export interface ParsedHolding {
   quantity: number;
   purchasePrice: number;
   currentPrice?: number;
+  isin?: string;
   purchaseDate?: string;
 }
 
@@ -28,13 +29,14 @@ export interface ParseOutcome {
   error?: string;
 }
 
-type Field = "ticker" | "quantity" | "purchasePrice" | "currentPrice" | "purchaseDate";
+type Field = "ticker" | "isin" | "quantity" | "purchasePrice" | "currentPrice" | "purchaseDate";
 
 /** Substrings that, if present in a normalized header, map it to a field. */
 const FIELD_MATCHERS: Record<Field, string[]> = {
-  // Includes mutual-fund identifiers (scheme / fund name / ISIN) so MF rows,
-  // which have no ticker symbol, are recognised too.
-  ticker: ["ticker", "symbol", "stock", "security", "instrument", "scheme", "fundname", "isin"],
+  // Includes mutual-fund identifiers (scheme / fund name) so MF rows, which
+  // have no ticker symbol, are recognised too.
+  ticker: ["ticker", "symbol", "stock", "security", "instrument", "scheme", "fundname"],
+  isin: ["isin"],
   quantity: ["quantity", "shares", "qty", "units", "position", "noofshares", "numberofshares"],
   purchasePrice: ["avgcost", "averageprice", "avgprice", "buyprice", "costpershare", "cost", "basis", "paid", "price"],
   currentPrice: ["currentprice", "currentnav", "marketprice", "lasttraded", "lastprice", "ltp", "cmp", "nav", "currentmarketprice"],
@@ -49,6 +51,7 @@ function matchField(header: string): Field | null {
   if (!n) return null;
   // Order matters: more specific fields are checked before generic "price".
   for (const sub of FIELD_MATCHERS.purchaseDate) if (n.includes(sub)) return "purchaseDate";
+  for (const sub of FIELD_MATCHERS.isin) if (n.includes(sub)) return "isin";
   for (const sub of FIELD_MATCHERS.ticker) if (n.includes(sub)) return "ticker";
   for (const sub of FIELD_MATCHERS.quantity) if (n.includes(sub)) return "quantity";
   for (const sub of FIELD_MATCHERS.currentPrice) if (n.includes(sub)) return "currentPrice";
@@ -75,7 +78,9 @@ function detectHeader(grid: unknown[][]): {
   const limit = Math.min(grid.length, 25);
   for (let r = 0; r < limit; r++) {
     const columns = mapHeaderRow(grid[r] ?? []);
-    if (columns.ticker !== undefined && columns.quantity !== undefined) {
+    // An identifier (ticker symbol OR ISIN) plus a quantity is enough.
+    const hasIdentifier = columns.ticker !== undefined || columns.isin !== undefined;
+    if (hasIdentifier && columns.quantity !== undefined) {
       return { index: r, columns };
     }
   }
@@ -154,7 +159,12 @@ function gridToHoldings(grid: unknown[][]): ParseOutcome {
     const row = grid[r] ?? [];
     if (row.every((c) => String(c ?? "").trim() === "")) continue; // blank row
 
-    const ticker = String(row[columns.ticker!] ?? "").trim().toUpperCase();
+    const isin =
+      columns.isin !== undefined ? String(row[columns.isin] ?? "").trim().toUpperCase() : "";
+    const tickerRaw =
+      columns.ticker !== undefined ? String(row[columns.ticker] ?? "").trim().toUpperCase() : "";
+    // Fall back to the ISIN as the identifier when there is no name/symbol.
+    const ticker = tickerRaw || isin;
     const quantity = toNumber(row[columns.quantity!]);
     const price = toNumber(row[columns.purchasePrice!]);
 
@@ -171,6 +181,7 @@ function gridToHoldings(grid: unknown[][]): ParseOutcome {
       columns.currentPrice !== undefined ? toNumber(row[columns.currentPrice]) : NaN;
 
     holdings.push({
+      isin: isin || undefined,
       ticker,
       quantity,
       purchasePrice: price,

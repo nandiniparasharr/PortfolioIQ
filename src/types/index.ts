@@ -18,6 +18,8 @@ export interface Holding {
   purchasePrice?: number;
   /** Optional current/market price per share (overrides modeled price). */
   currentPrice?: number;
+  /** Optional ISIN (used to resolve mutual-fund NAVs exactly). */
+  isin?: string;
   /** Optional acquisition date (ISO yyyy-mm-dd). */
   purchaseDate?: string;
 }

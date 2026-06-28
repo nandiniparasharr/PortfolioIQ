@@ -73,6 +73,20 @@ describe("parseHoldingsFile (CSV)", () => {
     });
   });
 
+  it("captures ISIN alongside the scheme name for mutual funds", async () => {
+    const csv = [
+      "Scheme Name,ISIN,Units,Cost",
+      "Axis Bluechip Fund Direct Growth,INF846K01EW2,120,45",
+    ].join("\n");
+    const out = await parseHoldingsFile(csvFile(csv));
+    expect(out.holdings[0]).toMatchObject({
+      ticker: "AXIS BLUECHIP FUND DIRECT GROWTH",
+      isin: "INF846K01EW2",
+      quantity: 120,
+      purchasePrice: 45,
+    });
+  });
+
   it("skips rows that are missing the required cost per share", async () => {
     const csv = [
       "ticker,quantity,price",

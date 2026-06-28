@@ -44,6 +44,7 @@ export async function POST(request: Request) {
       priceHints[h.ticker.toUpperCase()] = {
         current: h.currentPrice,
         cost: h.purchasePrice,
+        isin: h.isin,
       };
     }
     const [instruments, benchmarkHistory] = await Promise.all([

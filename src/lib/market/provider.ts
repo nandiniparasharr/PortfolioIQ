@@ -23,6 +23,7 @@ const BREAKER_MS = 60 * 1000;
 export interface PriceHint {
   current?: number;
   cost?: number;
+  isin?: string;
 }
 
 interface CacheEntry {
@@ -48,9 +49,26 @@ function symbolCandidates(ticker: string, currency?: string): string[] {
   return [t];
 }
 
+/** A mutual fund is identified by a scheme name (spaces) or an INF-prefix ISIN. */
+function isMutualFund(ticker: string, isin?: string): boolean {
+  return /\s/.test(ticker) || (!!isin && /^INF/i.test(isin)) || ticker.length > 16;
+}
+
 /** Try to resolve a live price; trips the breaker on a network failure. */
-async function fetchLivePrice(ticker: string, currency?: string): Promise<number | null> {
+async function fetchLivePrice(
+  ticker: string,
+  currency: string | undefined,
+  isin: string | undefined,
+): Promise<number | null> {
   if (Date.now() < liveDisabledUntil) return null;
+
+  // Mutual funds → AMFI NAV (by ISIN or scheme name).
+  if (isMutualFund(ticker, isin)) {
+    const { fetchMfNav } = await import("./amfi");
+    return fetchMfNav(isin, ticker);
+  }
+
+  // Equities / ETFs → Yahoo quote.
   const { fetchYahooPrice } = await import("./yahoo");
   for (const symbol of symbolCandidates(ticker, currency)) {
     try {
@@ -75,7 +93,7 @@ async function resolveOne(
   let anchor = hint?.current;
   let source = anchor != null ? "user" : "";
   if (anchor == null && isLivePricingEnabled()) {
-    const live = await fetchLivePrice(symbol, currency);
+    const live = await fetchLivePrice(symbol, currency, hint?.isin);
     if (live != null) {
       anchor = live;
       source = "live";

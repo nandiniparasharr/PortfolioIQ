@@ -41,6 +41,7 @@ export const analyzeRequestSchema = z.object({
         quantity: z.number().positive(),
         purchasePrice: z.number().positive().optional(),
         currentPrice: z.number().positive().optional(),
+        isin: z.string().optional(),
         purchaseDate: z.string().optional(),
       }),
     )
