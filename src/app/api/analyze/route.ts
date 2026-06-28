@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       }
     }
     const [instruments, benchmarkHistory] = await Promise.all([
-      resolveInstruments(tickers, priceHints),
+      resolveInstruments(tickers, priceHints, parsed.data.currency),
       resolveBenchmark(),
     ]);
 

@@ -90,7 +90,7 @@ describe("analytics engine", () => {
       { id: "3", ticker: "MGL", quantity: 18, purchasePrice: 1100 },
     ];
     const instruments = Object.fromEntries(
-      book.map((h) => [h.ticker, syntheticInstrument(h.ticker, h.purchasePrice)]),
+      book.map((h) => [h.ticker, syntheticInstrument(h.ticker, h.purchasePrice, "INR")]),
     );
     const a = computeAnalytics({
       holdings: book,
@@ -99,7 +99,10 @@ describe("analytics engine", () => {
       currency: "INR",
     });
     expect(a.baseCurrency).toBe("INR");
+    // INR holdings are geolocated to India / Asia Pacific, not a random region.
+    expect(a.allocation.byRegion.every((r) => r.label === "Asia Pacific")).toBe(true);
     for (const p of a.positions) {
+      expect(p.data.meta.country).toBe("India");
       // Unrealized return is bounded and realistic (no absurd ±900%).
       expect(p.unrealizedReturn).toBeGreaterThan(-0.4);
       expect(p.unrealizedReturn).toBeLessThan(0.9);

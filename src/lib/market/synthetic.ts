@@ -84,10 +84,11 @@ function getDates(): string[] {
 }
 
 /** Derive stable pseudo-fundamentals for a ticker not in the catalog. */
-function deriveSeed(ticker: string): InstrumentSeed {
+function deriveSeed(ticker: string, currency?: string): InstrumentSeed {
   const t = ticker.toUpperCase();
   const h = hashString(t);
   const rng = mulberry32(h);
+  const isINR = currency === "INR";
   const sectors: InstrumentMeta["sector"][] = [
     "Information Technology",
     "Financials",
@@ -108,7 +109,16 @@ function deriveSeed(ticker: string): InstrumentSeed {
     "Latin America",
   ];
   const sector = sectors[Math.floor(rng() * sectors.length)]!;
-  const region = regions[Math.floor(rng() * regions.length)]!;
+  // For INR portfolios, holdings are Indian — anchor geography accordingly
+  // instead of assigning a random region.
+  const region: InstrumentMeta["region"] = isINR
+    ? "Asia Pacific"
+    : regions[Math.floor(rng() * regions.length)]!;
+  const country = isINR
+    ? "India"
+    : region === "North America"
+      ? "United States"
+      : "International";
   const marketCap = 5e8 + rng() * 5e11;
   return {
     ticker: t,
@@ -116,10 +126,10 @@ function deriveSeed(ticker: string): InstrumentSeed {
     sector,
     industry: `${sector} — Diversified`,
     region,
-    country: region === "North America" ? "United States" : "International",
+    country,
     marketCap,
     marketCapBucket: bucketForMarketCap(marketCap),
-    currency: "USD",
+    currency: isINR ? "INR" : "USD",
     referencePrice: 20 + rng() * 480,
     annualDrift: 0.03 + rng() * 0.18,
     annualVol: 0.16 + rng() * 0.3,
@@ -127,8 +137,8 @@ function deriveSeed(ticker: string): InstrumentSeed {
   };
 }
 
-function seedFor(ticker: string): InstrumentSeed {
-  return getSeed(ticker) ?? deriveSeed(ticker);
+function seedFor(ticker: string, currency?: string): InstrumentSeed {
+  return getSeed(ticker) ?? deriveSeed(ticker, currency);
 }
 
 function metaFromSeed(seed: InstrumentSeed): InstrumentMeta {
@@ -145,8 +155,12 @@ function metaFromSeed(seed: InstrumentSeed): InstrumentMeta {
  * paid — instead of comparing their cost against an unrelated random price,
  * which produced absurd figures like +921% or -98%.
  */
-export function syntheticInstrument(ticker: string, anchorPrice?: number): InstrumentData {
-  const seed = seedFor(ticker);
+export function syntheticInstrument(
+  ticker: string,
+  anchorPrice?: number,
+  currency?: string,
+): InstrumentData {
+  const seed = seedFor(ticker, currency);
   const factor = marketFactor();
   const dates = getDates();
   const rng = mulberry32(hashString(seed.ticker) ^ 0x9e3779b9);

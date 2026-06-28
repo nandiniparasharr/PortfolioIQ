@@ -20,7 +20,7 @@ import { Section } from "./section";
 import { ScoreGauge } from "./score-gauge";
 import { MetricCard, type MetricTone } from "./metric-card";
 import { HoldingsTable } from "./holdings-table";
-import { ContributionTable } from "./contribution-table";
+import { PositionsPnlTable } from "./positions-pnl-table";
 import { AllocationBars } from "./allocation-bars";
 import { CommentaryPanel } from "./commentary-panel";
 import { ExportMenu } from "./export-menu";
@@ -183,7 +183,7 @@ export function DashboardView() {
       </Section>
 
       {/* Risk */}
-      <Section id="risk" title="Risk" description="Value at Risk, tail loss and per-position risk attribution.">
+      <Section id="risk" title="Risk" description="Value at Risk, tail loss and per-position returns.">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <MetricCard label="VaR 95% (1-day)" value={formatPercent(a.risk.valueAtRisk95)} hint="Historical" tone="warning" />
           <MetricCard label="VaR 99% (1-day)" value={formatPercent(a.risk.valueAtRisk99)} hint="Historical" tone="warning" />
@@ -192,10 +192,10 @@ export function DashboardView() {
         </div>
         <Card className="mt-4">
           <CardHeader>
-            <CardTitle>Risk & Return Contribution</CardTitle>
+            <CardTitle>Position Returns & P&L</CardTitle>
           </CardHeader>
           <CardContent>
-            <ContributionTable rows={a.risk.contribution} />
+            <PositionsPnlTable positions={a.positions} currency={ccy} />
           </CardContent>
         </Card>
       </Section>
