@@ -103,14 +103,30 @@ describe("analytics engine", () => {
     expect(a.allocation.byRegion.every((r) => r.label === "Asia Pacific")).toBe(true);
     for (const p of a.positions) {
       expect(p.data.meta.country).toBe("India");
-      // Unrealized return is bounded and realistic (no absurd ±900%).
-      expect(p.unrealizedReturn).toBeGreaterThan(-0.4);
-      expect(p.unrealizedReturn).toBeLessThan(0.9);
-      // Modeled price stays in a sane band around cost.
+      // Without a current price, price shows at cost (no fabricated return).
       const cost = p.holding.purchasePrice!;
-      expect(p.data.lastPrice).toBeGreaterThan(cost * 0.6);
-      expect(p.data.lastPrice).toBeLessThan(cost * 1.9);
+      expect(p.data.lastPrice).toBeCloseTo(cost, 1);
+      expect(Math.abs(p.unrealizedReturn ?? 0)).toBeLessThan(0.01);
     }
+  });
+
+  it("uses the supplied current price for accurate unrealized P&L", () => {
+    const book: Holding[] = [
+      { id: "1", ticker: "ITC", quantity: 25, purchasePrice: 326, currentPrice: 400 },
+    ];
+    const instruments = {
+      ITC: syntheticInstrument("ITC", 400, "INR"),
+    };
+    const a = computeAnalytics({
+      holdings: book,
+      instruments,
+      benchmarkHistory: syntheticBenchmark(),
+      currency: "INR",
+    });
+    const p = a.positions[0]!;
+    expect(p.data.lastPrice).toBeCloseTo(400, 1);
+    // Return = (400 - 326) / 326 ≈ +22.7%
+    expect(p.unrealizedReturn).toBeCloseTo((400 - 326) / 326, 2);
   });
 
   it("correlation matrix is symmetric with unit diagonal", () => {

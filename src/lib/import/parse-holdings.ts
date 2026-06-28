@@ -16,6 +16,7 @@ export interface ParsedHolding {
   ticker: string;
   quantity: number;
   purchasePrice: number;
+  currentPrice?: number;
   purchaseDate?: string;
 }
 
@@ -27,13 +28,14 @@ export interface ParseOutcome {
   error?: string;
 }
 
-type Field = "ticker" | "quantity" | "purchasePrice" | "purchaseDate";
+type Field = "ticker" | "quantity" | "purchasePrice" | "currentPrice" | "purchaseDate";
 
 /** Substrings that, if present in a normalized header, map it to a field. */
 const FIELD_MATCHERS: Record<Field, string[]> = {
   ticker: ["ticker", "symbol", "stock", "security", "instrument"],
   quantity: ["quantity", "shares", "qty", "units", "position", "noofshares", "numberofshares"],
-  purchasePrice: ["price", "cost", "basis", "paid", "avgcost", "averageprice", "buyprice"],
+  purchasePrice: ["avgcost", "averageprice", "avgprice", "buyprice", "costpershare", "cost", "basis", "paid", "price"],
+  currentPrice: ["currentprice", "currentnav", "marketprice", "lasttraded", "lastprice", "ltp", "cmp", "nav", "currentmarketprice"],
   purchaseDate: ["date", "acquired", "purchased", "tradedate", "buydate"],
 };
 
@@ -43,10 +45,11 @@ const normalize = (s: unknown): string =>
 function matchField(header: string): Field | null {
   const n = normalize(header);
   if (!n) return null;
-  // Date must win over price for "purchasedate" vs "purchaseprice".
+  // Order matters: more specific fields are checked before generic "price".
   for (const sub of FIELD_MATCHERS.purchaseDate) if (n.includes(sub)) return "purchaseDate";
   for (const sub of FIELD_MATCHERS.ticker) if (n.includes(sub)) return "ticker";
   for (const sub of FIELD_MATCHERS.quantity) if (n.includes(sub)) return "quantity";
+  for (const sub of FIELD_MATCHERS.currentPrice) if (n.includes(sub)) return "currentPrice";
   for (const sub of FIELD_MATCHERS.purchasePrice) if (n.includes(sub)) return "purchasePrice";
   return null;
 }
@@ -153,10 +156,14 @@ function gridToHoldings(grid: unknown[][]): ParseOutcome {
       continue;
     }
 
+    const current =
+      columns.currentPrice !== undefined ? toNumber(row[columns.currentPrice]) : NaN;
+
     holdings.push({
       ticker,
       quantity,
       purchasePrice: price,
+      currentPrice: Number.isFinite(current) && current > 0 ? current : undefined,
       purchaseDate:
         columns.purchaseDate !== undefined
           ? normalizeDate(row[columns.purchaseDate])

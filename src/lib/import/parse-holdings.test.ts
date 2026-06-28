@@ -47,6 +47,17 @@ describe("parseHoldingsFile (CSV)", () => {
     expect(out.holdings[1]!.purchasePrice).toBe(1234.5);
   });
 
+  it("maps a current-price / LTP column when present", async () => {
+    const csv = ["Symbol,Qty,Avg Price,LTP", "ITC,25,326,400.5"].join("\n");
+    const out = await parseHoldingsFile(csvFile(csv));
+    expect(out.holdings[0]).toMatchObject({
+      ticker: "ITC",
+      quantity: 25,
+      purchasePrice: 326,
+      currentPrice: 400.5,
+    });
+  });
+
   it("skips rows that are missing the required cost per share", async () => {
     const csv = [
       "ticker,quantity,price",

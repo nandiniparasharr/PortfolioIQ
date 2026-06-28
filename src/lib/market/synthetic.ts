@@ -165,12 +165,12 @@ export function syntheticInstrument(
   const dates = getDates();
   const rng = mulberry32(hashString(seed.ticker) ^ 0x9e3779b9);
 
-  let referenceTarget = seed.referencePrice;
-  if (anchorPrice && anchorPrice > 0) {
-    const rrng = mulberry32(hashString(seed.ticker) ^ 0x85ebca6b);
-    const totalReturn = -0.35 + rrng() * 1.2; // bounded -35% .. +85%
-    referenceTarget = anchorPrice * (1 + totalReturn);
-  }
+  // Anchor the modeled current price EXACTLY to the provided price (the user's
+  // current price if supplied, otherwise their cost basis). No fabricated
+  // return is applied — so without a real/entered current price the position
+  // simply shows at cost (0% unrealized) instead of an invented figure.
+  const referenceTarget =
+    anchorPrice && anchorPrice > 0 ? anchorPrice : seed.referencePrice;
 
   const dailyDrift = seed.annualDrift / TRADING_DAYS_PER_YEAR;
   const idioVol = seed.annualVol / Math.sqrt(TRADING_DAYS_PER_YEAR);
@@ -189,7 +189,9 @@ export function syntheticInstrument(
     cumulative *= 1 + returns[t]!;
     factors.push(cumulative);
   }
-  const finalFactor = factors[factors.length - 1]!;
+  // Use the factor at the LAST history index (dates.length - 1), not the extra
+  // trailing factor, so the final close lands exactly on referenceTarget.
+  const finalFactor = factors[dates.length - 1]!;
   const startPrice = referenceTarget / finalFactor;
   for (let t = 0; t < dates.length; t++) {
     history.push({

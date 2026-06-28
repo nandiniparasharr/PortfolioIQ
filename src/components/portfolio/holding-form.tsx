@@ -31,6 +31,7 @@ export function HoldingForm() {
       ticker: values.ticker,
       quantity: values.quantity,
       purchasePrice: values.purchasePrice,
+      currentPrice: values.currentPrice,
       purchaseDate: values.purchaseDate || undefined,
     });
     reset();
@@ -83,6 +84,22 @@ export function HoldingForm() {
           />
           {errors.purchasePrice && (
             <p className="text-2xs text-negative">{errors.purchasePrice.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="currentPrice">Current price (optional)</Label>
+          <Input
+            id="currentPrice"
+            type="number"
+            step="any"
+            inputMode="decimal"
+            placeholder="Live price for accurate P&L"
+            className="tabular"
+            {...register("currentPrice")}
+          />
+          {errors.currentPrice && (
+            <p className="text-2xs text-negative">{errors.currentPrice.message}</p>
           )}
         </div>
 

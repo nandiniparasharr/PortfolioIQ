@@ -34,6 +34,7 @@ export function HoldingsEditor() {
             <th className="px-4 py-2.5 text-left font-medium">Ticker</th>
             <th className="px-4 py-2.5 text-right font-medium">Quantity</th>
             <th className="px-4 py-2.5 text-right font-medium">Cost / Share *</th>
+            <th className="px-4 py-2.5 text-right font-medium">Current Price</th>
             <th className="px-4 py-2.5 text-right font-medium">Date</th>
             <th className="w-12 px-4 py-2.5" />
           </tr>
@@ -71,6 +72,20 @@ export function HoldingsEditor() {
                     (h.purchasePrice == null || h.purchasePrice <= 0) &&
                       "border-warning/50",
                   )}
+                />
+              </td>
+              <td className="px-2 py-1.5 text-right">
+                <Input
+                  type="number"
+                  step="any"
+                  value={h.currentPrice ?? ""}
+                  placeholder="—"
+                  onChange={(e) =>
+                    updateHolding(h.id, {
+                      currentPrice: e.target.value ? Number(e.target.value) : undefined,
+                    })
+                  }
+                  className="h-8 w-28 ml-auto text-right tabular"
                 />
               </td>
               <td className="px-2 py-1.5 text-right">

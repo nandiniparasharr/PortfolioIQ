@@ -43,6 +43,7 @@ function upsert(holdings: Holding[], incoming: Holding): Holding[] {
     ...existing,
     quantity: totalQty,
     purchasePrice,
+    currentPrice: incoming.currentPrice ?? existing.currentPrice,
   };
   const next = [...holdings];
   next[existingIndex] = merged;

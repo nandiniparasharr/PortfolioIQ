@@ -99,8 +99,9 @@ export default function PortfolioPage() {
                 <div className="mt-5 flex items-start gap-2 rounded-lg border border-border bg-surface-muted/60 p-3">
                   <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                   <p className="text-2xs leading-relaxed text-muted-foreground">
-                    Ticker, quantity and cost per share are required. Purchase date
-                    is optional and used for cost-basis context.
+                    Ticker, quantity and cost per share are required. Add a
+                    current price (or an LTP/NAV column in your file) for accurate
+                    P&amp;L — otherwise positions are shown at cost.
                   </p>
                 </div>
               </CardContent>

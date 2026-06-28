@@ -16,6 +16,8 @@ export interface Holding {
   quantity: number;
   /** Optional cost basis per share. */
   purchasePrice?: number;
+  /** Optional current/market price per share (overrides modeled price). */
+  currentPrice?: number;
   /** Optional acquisition date (ISO yyyy-mm-dd). */
   purchaseDate?: string;
 }

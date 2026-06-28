@@ -17,6 +17,9 @@ export const holdingFormSchema = z.object({
     .number({ invalid_type_error: "Cost per share is required" })
     .positive("Cost per share must be greater than zero")
     .finite(),
+  currentPrice: z
+    .union([z.coerce.number().positive().finite(), z.literal("").transform(() => undefined)])
+    .optional(),
   purchaseDate: z
     .string()
     .trim()
@@ -37,6 +40,7 @@ export const analyzeRequestSchema = z.object({
         ticker: z.string().min(1).transform((v) => v.toUpperCase()),
         quantity: z.number().positive(),
         purchasePrice: z.number().positive().optional(),
+        currentPrice: z.number().positive().optional(),
         purchaseDate: z.string().optional(),
       }),
     )

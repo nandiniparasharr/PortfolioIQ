@@ -41,8 +41,10 @@ export async function POST(request: Request) {
     // unrealized P&L realistic when live data isn't available).
     const priceHints: Record<string, number> = {};
     for (const h of holdings) {
-      if (h.purchasePrice && h.purchasePrice > 0) {
-        priceHints[h.ticker.toUpperCase()] = h.purchasePrice;
+      // Prefer the user-supplied current price; otherwise show at cost basis.
+      const anchor = h.currentPrice ?? h.purchasePrice;
+      if (anchor && anchor > 0) {
+        priceHints[h.ticker.toUpperCase()] = anchor;
       }
     }
     const [instruments, benchmarkHistory] = await Promise.all([
