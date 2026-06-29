@@ -5,6 +5,7 @@ import { LineChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { ISTClock } from "./ist-clock";
+import { MobileNav } from "./mobile-nav";
 
 /**
  * Top navigation header (replaces the former sidebar).
@@ -36,7 +37,7 @@ export function Header() {
           >
             How it works?
           </Link>
-          <Button asChild size="sm" className="px-4">
+          <Button asChild size="sm" className="hidden px-4 sm:inline-flex">
             <Link href="/portfolio">Build your portfolio</Link>
           </Button>
           <Link
@@ -48,7 +49,10 @@ export function Header() {
 
           <span className="mx-1 hidden h-5 w-px bg-border md:block" />
           <ISTClock />
-          <ThemeToggle />
+          <ThemeToggle className="hidden sm:inline-flex" />
+
+          {/* Mobile menu (drawer) */}
+          <MobileNav />
         </nav>
       </div>
     </header>
