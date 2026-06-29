@@ -104,7 +104,23 @@ describe("parseHoldingsFile (CSV)", () => {
     const csv = ["ticker,quantity", "AAPL,10"].join("\n");
     const out = await parseHoldingsFile(csvFile(csv));
     expect(out.holdings).toHaveLength(0);
-    expect(out.error).toMatch(/cost per share is required/i);
+    expect(out.error).toMatch(/couldn't find a holdings table/i);
+  });
+
+  it("imports stacked tables (e.g. equity then mutual funds) in one sheet", async () => {
+    const csv = [
+      "Symbol,Qty,Avg Price",
+      "ITC,25,326",
+      "",
+      "Scheme Name,Units,Cost,Current NAV",
+      "Motilal Oswal Gold and Silver Passive Fund of Funds Direct Growth,1200,12.5,15.2",
+    ].join("\n");
+    const out = await parseHoldingsFile(csvFile(csv));
+    expect(out.holdings).toHaveLength(2);
+    expect(out.holdings.map((h) => h.ticker)).toContain("ITC");
+    const mf = out.holdings.find((h) => h.ticker.startsWith("MOTILAL"));
+    expect(mf).toBeTruthy();
+    expect(mf!.currentPrice).toBe(15.2);
   });
 
   it("errors when no holdings table can be found", async () => {

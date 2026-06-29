@@ -15,7 +15,7 @@ import Papa from "papaparse";
 export interface ParsedHolding {
   ticker: string;
   quantity: number;
-  purchasePrice: number;
+  purchasePrice?: number;
   currentPrice?: number;
   isin?: string;
   purchaseDate?: string;
@@ -70,21 +70,9 @@ function mapHeaderRow(row: unknown[]): Partial<Record<Field, number>> {
   return map;
 }
 
-/** Find the header row: first row (within the top 25) resolving ticker+qty. */
-function detectHeader(grid: unknown[][]): {
-  index: number;
-  columns: Partial<Record<Field, number>>;
-} | null {
-  const limit = Math.min(grid.length, 25);
-  for (let r = 0; r < limit; r++) {
-    const columns = mapHeaderRow(grid[r] ?? []);
-    // An identifier (ticker symbol OR ISIN) plus a quantity is enough.
-    const hasIdentifier = columns.ticker !== undefined || columns.isin !== undefined;
-    if (hasIdentifier && columns.quantity !== undefined) {
-      return { index: r, columns };
-    }
-  }
-  return null;
+/** Whether a grid contains at least one holdings table. */
+function hasTable(grid: unknown[][]): boolean {
+  return findHeaders(grid).length > 0;
 }
 
 function toNumber(value: unknown): number {
@@ -99,7 +87,7 @@ function toNumber(value: unknown): number {
  * letter and not be a pure number; capped to a sane length.
  */
 function isValidIdentifier(s: string): boolean {
-  if (!s || s.length > 64) return false;
+  if (!s || s.length > 120) return false; // long fund/FoF names are valid
   if (/^\d+(\.\d+)?$/.test(s)) return false;
   return /[A-Za-z]/.test(s);
 }
@@ -128,81 +116,108 @@ function normalizeDate(value: unknown): string | undefined {
   return undefined;
 }
 
-/** Convert a detected grid + header mapping into holdings. */
-function gridToHoldings(grid: unknown[][]): ParseOutcome {
-  const header = detectHeader(grid);
-  if (!header) {
-    return {
-      holdings: [],
-      skipped: 0,
-      headerRow: null,
-      error:
-        "Couldn't find a holdings table. Make sure the file has columns for ticker/symbol, quantity and cost per share.",
-    };
-  }
+type Columns = Partial<Record<Field, number>>;
 
-  const { columns } = header;
-  if (columns.purchasePrice === undefined) {
-    return {
-      holdings: [],
-      skipped: 0,
-      headerRow: header.index,
-      error:
-        "Cost per share is required, but no price/cost column was found. Add a 'Cost per share' (or 'Price') column.",
-    };
-  }
+/** A header row qualifies a table band when it has an id, a quantity and a price. */
+function isTableHeader(columns: Columns): boolean {
+  const hasId = columns.ticker !== undefined || columns.isin !== undefined;
+  const hasPrice =
+    columns.purchasePrice !== undefined || columns.currentPrice !== undefined;
+  return hasId && columns.quantity !== undefined && hasPrice;
+}
 
-  const holdings: ParsedHolding[] = [];
+/** Find every header band in a grid (a sheet may stack several tables). */
+function findHeaders(grid: unknown[][]): { index: number; columns: Columns }[] {
+  const headers: { index: number; columns: Columns }[] = [];
+  for (let r = 0; r < grid.length; r++) {
+    const columns = mapHeaderRow(grid[r] ?? []);
+    if (isTableHeader(columns)) headers.push({ index: r, columns });
+  }
+  return headers;
+}
+
+/** Parse one table band (rows between this header and the next / end). */
+function parseBand(
+  grid: unknown[][],
+  columns: Columns,
+  start: number,
+  end: number,
+  out: ParsedHolding[],
+): number {
   let skipped = 0;
-
-  for (let r = header.index + 1; r < grid.length; r++) {
+  for (let r = start; r < end; r++) {
     const row = grid[r] ?? [];
-    if (row.every((c) => String(c ?? "").trim() === "")) continue; // blank row
+    if (row.every((c) => String(c ?? "").trim() === "")) continue;
 
     const isin =
       columns.isin !== undefined ? String(row[columns.isin] ?? "").trim().toUpperCase() : "";
     const tickerRaw =
       columns.ticker !== undefined ? String(row[columns.ticker] ?? "").trim().toUpperCase() : "";
-    // Fall back to the ISIN as the identifier when there is no name/symbol.
     const ticker = tickerRaw || isin;
     const quantity = toNumber(row[columns.quantity!]);
-    const price = toNumber(row[columns.purchasePrice!]);
+    const cost =
+      columns.purchasePrice !== undefined ? toNumber(row[columns.purchasePrice]) : NaN;
+    const current =
+      columns.currentPrice !== undefined ? toNumber(row[columns.currentPrice]) : NaN;
+
+    const hasCost = Number.isFinite(cost) && cost > 0;
+    const hasCurrent = Number.isFinite(current) && current > 0;
 
     if (!isValidIdentifier(ticker) || !Number.isFinite(quantity) || quantity <= 0) {
       skipped++;
       continue;
     }
-    if (!Number.isFinite(price) || price <= 0) {
-      skipped++; // cost per share is required
+    // A position needs at least one price to be valued (cost and/or current).
+    if (!hasCost && !hasCurrent) {
+      skipped++;
       continue;
     }
 
-    const current =
-      columns.currentPrice !== undefined ? toNumber(row[columns.currentPrice]) : NaN;
-
-    holdings.push({
+    out.push({
       isin: isin || undefined,
       ticker,
       quantity,
-      purchasePrice: price,
-      currentPrice: Number.isFinite(current) && current > 0 ? current : undefined,
+      purchasePrice: hasCost ? cost : undefined,
+      currentPrice: hasCurrent ? current : undefined,
       purchaseDate:
         columns.purchaseDate !== undefined
           ? normalizeDate(row[columns.purchaseDate])
           : undefined,
     });
   }
+  return skipped;
+}
 
-  if (holdings.length === 0 && !skipped) {
+/** Convert a grid (one or more stacked tables) into holdings. */
+function gridToHoldings(grid: unknown[][]): ParseOutcome {
+  const headers = findHeaders(grid);
+  if (headers.length === 0) {
+    return {
+      holdings: [],
+      skipped: 0,
+      headerRow: null,
+      error:
+        "Couldn't find a holdings table. Make sure the file has columns for ticker/symbol (or scheme/ISIN), quantity and a price (cost or current).",
+    };
+  }
+
+  const holdings: ParsedHolding[] = [];
+  let skipped = 0;
+  for (let h = 0; h < headers.length; h++) {
+    const end = h + 1 < headers.length ? headers[h + 1]!.index : grid.length;
+    skipped += parseBand(grid, headers[h]!.columns, headers[h]!.index + 1, end, holdings);
+  }
+
+  if (holdings.length === 0 && skipped === 0) {
     return {
       holdings,
       skipped,
-      headerRow: header.index,
+      headerRow: headers[0]!.index,
       error: "No data rows were found beneath the detected header.",
     };
   }
 
-  return { holdings, skipped, headerRow: header.index };
+  return { holdings, skipped, headerRow: headers[0]!.index };
 }
 
 async function readCsv(file: File): Promise<unknown[][]> {
@@ -247,14 +262,14 @@ const COMBINED_SHEET_RE = /combined|consolidat|overall|all\s*holdings/i;
  *     separate tabs (e.g. "Equity" + "Mutual Funds") are all included.
  */
 function holdingsFromSheets(sheets: SheetGrid[]): ParseOutcome {
-  const withTable = sheets.filter((s) => detectHeader(s.grid) !== null);
+  const withTable = sheets.filter((s) => hasTable(s.grid));
   if (withTable.length === 0) {
     return {
       holdings: [],
       skipped: 0,
       headerRow: null,
       error:
-        "Couldn't find a holdings table in any sheet. Make sure a sheet has columns for ticker/symbol, quantity and cost per share.",
+        "Couldn't find a holdings table in any sheet. Make sure a sheet has columns for ticker/symbol (or scheme/ISIN), quantity and a price.",
     };
   }
 

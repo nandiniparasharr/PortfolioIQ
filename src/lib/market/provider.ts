@@ -50,9 +50,14 @@ function symbolCandidates(ticker: string, currency?: string): string[] {
   return [t];
 }
 
-/** A mutual fund is identified by a scheme name (spaces) or an INF-prefix ISIN. */
-function isMutualFund(ticker: string, isin?: string): boolean {
-  return /\s/.test(ticker) || (!!isin && /^INF/i.test(isin)) || ticker.length > 16;
+/**
+ * A mutual fund is identified by a scheme NAME (has spaces / very long), not by
+ * its ISIN. Exchange-traded funds (e.g. HNGSNGBEES) have INF-prefixed ISINs too
+ * but trade like stocks, so they must use the market price from Yahoo — not the
+ * AMFI NAV. Routing on the name shape keeps ETFs on the equity path.
+ */
+function isMutualFund(ticker: string): boolean {
+  return /\s/.test(ticker) || ticker.length > 18;
 }
 
 /**
@@ -67,7 +72,7 @@ async function fetchLivePrice(
   isin: string | undefined,
 ): Promise<number | null> {
   // Mutual funds → AMFI NAV (AMFI manages its own breaker).
-  if (isMutualFund(ticker, isin)) {
+  if (isMutualFund(ticker)) {
     const { fetchMfNav } = await import("./amfi");
     return fetchMfNav(isin, ticker);
   }
