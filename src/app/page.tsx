@@ -17,6 +17,7 @@ import {
   TrendingUp,
   LineChart,
   Wand2,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,9 +34,26 @@ const CAPABILITIES = [
 ];
 
 const STEPS = [
-  { icon: Upload, title: "Add your holdings", body: "Import a CSV or Excel export from your broker, or type positions by hand. The table is auto-detected." },
-  { icon: LineChart, title: "Compute analytics", body: "A deterministic engine resolves market data and computes every metric from real daily return series." },
-  { icon: Wand2, title: "Read the narrative", body: "An institutional AI layer interprets the computed numbers into a clear, actionable portfolio brief." },
+  {
+    icon: Upload,
+    title: "Upload your portfolio",
+    body: "Import your holdings using a CSV or Excel file, or add them manually. PortfolioIQ automatically detects portfolio tables, combines data from multiple sheets when needed, and prepares everything for analysis.",
+  },
+  {
+    icon: LineChart,
+    title: "Analyze the numbers",
+    body: "The platform calculates a wide range of portfolio metrics — asset allocation, returns, volatility, Sharpe and Sortino ratios, maximum drawdown, beta, Value at Risk, correlation, diversification, and portfolio health. Every result comes from documented formulas and deterministic calculations, so you always know where the numbers come from.",
+  },
+  {
+    icon: Wand2,
+    title: "Get an AI summary",
+    body: "Once the analysis is complete, AI reviews the calculated metrics and writes a concise investment brief. It only interprets the numbers that have already been computed, so every insight stays grounded in real data.",
+  },
+  {
+    icon: BarChart3,
+    title: "Explore your portfolio",
+    body: "Use interactive charts, compare holdings, filter positions, and export your analysis whenever you need it. Your data stays private throughout the session, and no account is required.",
+  },
 ];
 
 const METHODS = [
@@ -116,7 +134,7 @@ export default function HomePage() {
             transition={{ duration: 0.5 }}
             className="mt-6 text-2xs uppercase tracking-wider text-muted-foreground"
           >
-            No account · Processed locally for this session · Times shown in IST
+            No account · Processed locally for this session · Not stored
           </motion.p>
         </motion.div>
 
@@ -154,7 +172,7 @@ export default function HomePage() {
       {/* How it works */}
       <section id="how-it-works" className="relative mx-auto max-w-5xl scroll-mt-24 px-6 py-14">
         <SectionHeading eyebrow="How it works" title="From positions to a portfolio brief" center />
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s, i) => {
             const Icon = s.icon;
             return (
@@ -214,35 +232,45 @@ export default function HomePage() {
 
       {/* About */}
       <section id="about" className="relative mx-auto max-w-5xl scroll-mt-24 px-6 py-14 pb-24">
+        <SectionHeading eyebrow="About" title="Why PortfolioIQ" center />
         <div className="glass rounded-2xl p-6 lg:p-10">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-xl">
-              <div className="text-2xs font-semibold uppercase tracking-wider text-primary">About</div>
-              <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
-                Transparent, institutional-grade by design
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                PortfolioIQ is a portfolio analytics platform built to the standard
-                of an internal analytics desk. Every metric is computed from
-                documented formulas on real daily return series — no mocked
-                calculations and no fabricated figures. The AI layer only
-                interprets numbers it is given, and your holdings never leave your
-                browser session.
-              </p>
-              <Button asChild size="sm" className="mt-5">
-                <Link href="/portfolio">
-                  Build your portfolio
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
+          <div className="mx-auto max-w-3xl space-y-4 text-sm leading-relaxed text-muted-foreground">
+            <p>
+              PortfolioIQ is an institutional-grade portfolio analytics platform
+              built for investors who want to understand <em>why</em> a portfolio
+              behaves the way it does.
+            </p>
+            <p>
+              Instead of relying on opaque AI-generated opinions, PortfolioIQ
+              computes every portfolio metric using transparent quantitative
+              methodology and then uses AI only to explain those results in plain
+              English. Every insight is grounded in deterministic calculations,
+              ensuring the analysis remains accurate, auditable, and free from
+              hallucinated conclusions.
+            </p>
+            <p>
+              Whether you&apos;re evaluating diversification, measuring downside
+              risk, understanding factor exposure, or reviewing portfolio health,
+              PortfolioIQ presents the same core analytics expected from
+              professional investment research platforms through a clean, intuitive
+              interface.
+            </p>
+          </div>
+
+          <div className="mt-7 flex flex-col items-center gap-4 border-t border-border/70 pt-6">
+            <div className="flex flex-wrap justify-center gap-2">
               {METHODS.map((m) => (
                 <Badge key={m} variant="outline" className="normal-case tracking-normal">
                   {m}
                 </Badge>
               ))}
             </div>
+            <Button asChild size="sm">
+              <Link href="/portfolio">
+                Build your portfolio
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
