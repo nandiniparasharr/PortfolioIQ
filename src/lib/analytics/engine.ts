@@ -240,14 +240,6 @@ function riskScore(
   return Math.round(clamp(score, 0, 100));
 }
 
-function gradeFromHealth(health: number): "A" | "B" | "C" | "D" | "F" {
-  if (health >= 85) return "A";
-  if (health >= 70) return "B";
-  if (health >= 55) return "C";
-  if (health >= 40) return "D";
-  return "F";
-}
-
 export function computeAnalytics(input: EngineInput): PortfolioAnalytics {
   const rf = input.riskFreeRate ?? DEFAULT_RISK_FREE_RATE;
   const warnings: string[] = [];
@@ -447,7 +439,6 @@ export function computeAnalytics(input: EngineInput): PortfolioAnalytics {
       health,
       risk: rScore,
       diversification: divScore,
-      grade: gradeFromHealth(health),
     },
     warnings,
   };

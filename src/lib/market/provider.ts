@@ -113,17 +113,11 @@ async function resolveOne(
     source = "cost";
   }
 
-  const priceSource: "live" | "user" | "cost" =
-    source === "live" || source === "user" ? source : "cost";
-
-  const cacheKey = `${symbol}|${anchor ?? ""}|${priceSource}|${currency ?? ""}`;
+  const cacheKey = `${symbol}|${anchor ?? ""}|${source}|${currency ?? ""}`;
   const cached = cache.get(cacheKey);
   if (cached && cached.expires > Date.now()) return cached.data;
 
-  const data: InstrumentData = {
-    ...syntheticInstrument(symbol, anchor, currency),
-    priceSource,
-  };
+  const data = syntheticInstrument(symbol, anchor, currency);
   cache.set(cacheKey, { data, expires: Date.now() + TTL_MS });
   return data;
 }

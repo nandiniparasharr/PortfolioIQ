@@ -75,9 +75,6 @@ export interface PricePoint {
   close: number;
 }
 
-/** Where the current price came from. */
-export type PriceSource = "live" | "user" | "cost";
-
 /** Full market snapshot for one instrument. */
 export interface InstrumentData {
   meta: InstrumentMeta;
@@ -85,8 +82,6 @@ export interface InstrumentData {
   lastPrice: number;
   /** Ascending daily close history (oldest first). */
   history: PricePoint[];
-  /** How `lastPrice` was determined. */
-  priceSource?: PriceSource;
 }
 
 /** Everything the analytics engine needs about one position. */
@@ -202,7 +197,6 @@ export interface PortfolioAnalytics {
     risk: number;
     /** 0-100, higher = better diversified. */
     diversification: number;
-    grade: "A" | "B" | "C" | "D" | "F";
   };
 
   warnings: string[];

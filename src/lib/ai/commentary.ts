@@ -25,10 +25,8 @@ export function deterministicCommentary(a: PortfolioAnalytics): PortfolioComment
   const perf = a.performance;
   const div = a.diversification;
   const risk = a.risk;
-  const grade = a.scores.grade;
-
   const executiveSummary = [
-    `The portfolio comprises ${div.holdingsCount} position${div.holdingsCount === 1 ? "" : "s"} across ${div.sectorCount} sector${div.sectorCount === 1 ? "" : "s"}, with a composite health score of ${a.scores.health}/100 (grade ${grade}).`,
+    `The portfolio comprises ${div.holdingsCount} position${div.holdingsCount === 1 ? "" : "s"} across ${div.sectorCount} sector${div.sectorCount === 1 ? "" : "s"}, with a composite health score of ${a.scores.health}/100.`,
     `On a trailing basis it has delivered an annualized return of ${formatSignedPercent(perf.annualizedReturn)} against annualized volatility of ${formatPercent(perf.annualizedVolatility)}, for a Sharpe ratio of ${perf.sharpeRatio.toFixed(2)}.`,
     `Exposure is led by ${topSectors(a)}, and the book carries a market beta of ${perf.beta.toFixed(2)}.`,
   ].join(" ");
@@ -122,7 +120,6 @@ export function deterministicCommentary(a: PortfolioAnalytics): PortfolioComment
 function analyticsDigest(a: PortfolioAnalytics): Record<string, unknown> {
   return {
     healthScore: a.scores.health,
-    grade: a.scores.grade,
     riskScore: a.scores.risk,
     diversificationScore: a.scores.diversification,
     totalValue: Math.round(a.totalValue),

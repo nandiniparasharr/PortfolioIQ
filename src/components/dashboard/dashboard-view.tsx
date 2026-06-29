@@ -13,7 +13,6 @@ import {
   type Currency,
 } from "@/lib/format";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Section } from "./section";
@@ -61,7 +60,6 @@ export function DashboardView() {
             <h1 className="text-2xl font-semibold tracking-tight">
               Portfolio Dashboard
             </h1>
-            <Badge variant={gradeTone(a.scores.grade)}>Grade {a.scores.grade}</Badge>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {formatCompactCurrency(a.totalValue, ccy)} across {a.diversification.holdingsCount}{" "}
@@ -252,12 +250,6 @@ function filterChip(active: boolean): string {
       ? "border-primary/40 bg-primary/15 text-primary"
       : "border-border bg-surface-muted text-muted-foreground hover:text-foreground",
   ].join(" ");
-}
-
-function gradeTone(grade: string): "positive" | "warning" | "negative" {
-  if (grade === "A" || grade === "B") return "positive";
-  if (grade === "C") return "warning";
-  return "negative";
 }
 
 function EmptyState() {

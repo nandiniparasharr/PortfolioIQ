@@ -70,7 +70,6 @@ describe("analytics engine", () => {
       expect(s).toBeGreaterThanOrEqual(0);
       expect(s).toBeLessThanOrEqual(100);
     }
-    expect(["A", "B", "C", "D", "F"]).toContain(a.scores.grade);
   });
 
   it("is deterministic for identical inputs", () => {

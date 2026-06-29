@@ -74,12 +74,33 @@ async function load(): Promise<AmfiData> {
   return cache;
 }
 
-/** Jaccard-style overlap of two token sets. */
-function overlap(a: Set<string>, b: Set<string>): number {
-  if (a.size === 0 || b.size === 0) return 0;
+/**
+ * Score an AMFI scheme against the user's scheme name.
+ *
+ * Uses COVERAGE (how many of the user's words appear in the scheme name)
+ * rather than Jaccard, so the scheme's many extra official words ("Fund of
+ * Funds", "Direct", "Plan", ...) don't dilute a genuine match. Plan
+ * (Direct/Regular) and option (Growth/IDCW) act as tie-breakers, defaulting to
+ * Direct + Growth when the user didn't specify, so the right variant's NAV is
+ * chosen among near-duplicates.
+ */
+function scoreEntry(target: Set<string>, entry: NameEntry): { ok: boolean; score: number } {
   let inter = 0;
-  for (const t of a) if (b.has(t)) inter++;
-  return inter / (a.size + b.size - inter);
+  for (const t of target) if (entry.tokens.has(t)) inter++;
+  const coverage = inter / target.size;
+  if (inter < 3 || coverage < 0.6) return { ok: false, score: 0 };
+
+  let score = coverage * 100 + inter;
+  const e = entry.tokens;
+  const wantsRegular = target.has("regular");
+  const wantsDirect = target.has("direct") || !wantsRegular; // default to direct
+  if (wantsDirect && e.has("direct")) score += 6;
+  if (wantsRegular && e.has("regular")) score += 6;
+  const wantsIdcw = target.has("idcw") || target.has("dividend");
+  const wantsGrowth = target.has("growth") || !wantsIdcw; // default to growth
+  if (wantsGrowth && e.has("growth")) score += 4;
+  if (wantsIdcw && (e.has("idcw") || e.has("dividend"))) score += 4;
+  return { ok: true, score };
 }
 
 /**
@@ -110,14 +131,13 @@ export async function fetchMfNav(
     let best = 0;
     let bestNav: number | null = null;
     for (const entry of data.names) {
-      const score = overlap(target, entry.tokens);
-      if (score > best) {
+      const { ok, score } = scoreEntry(target, entry);
+      if (ok && score > best) {
         best = score;
         bestNav = entry.nav;
       }
     }
-    // Require a strong match to avoid returning an unrelated scheme's NAV.
-    if (best >= 0.6) return bestNav;
+    return bestNav;
   }
   return null;
 }

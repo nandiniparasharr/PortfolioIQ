@@ -28,7 +28,7 @@ const CAPABILITIES = [
   { icon: Activity, title: "Performance", body: "Annualized return, volatility, Sharpe, Sortino, drawdown and rolling risk." },
   { icon: ShieldCheck, title: "Risk engine", body: "Historical VaR & Expected Shortfall, beta and per-position risk attribution." },
   { icon: Network, title: "Correlation", body: "Full pairwise correlation matrix and average correlation across holdings." },
-  { icon: Gauge, title: "Scoring", body: "Transparent Health, Risk and Diversification scores with a letter grade." },
+  { icon: Gauge, title: "Scoring", body: "Transparent Health, Risk and Diversification scores rolled up from documented metrics." },
   { icon: Sparkles, title: "AI commentary", body: "Institutional narrative strictly grounded in the computed analytics." },
 ];
 
@@ -309,7 +309,7 @@ function DashboardPreview() {
           </div>
           <span className="text-sm font-semibold tracking-tight text-foreground">Portfolio Health</span>
         </div>
-        <Badge variant="positive">Grade A</Badge>
+        <Badge variant="positive">82 / 100</Badge>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

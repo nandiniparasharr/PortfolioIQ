@@ -62,7 +62,6 @@ export function exportMetricsCsv(a: PortfolioAnalytics) {
     ["As of", a.asOf],
     [`Total value (${a.baseCurrency})`, a.totalValue.toFixed(2)],
     ["Health score", String(a.scores.health)],
-    ["Grade", a.scores.grade],
     ["Risk score", String(a.scores.risk)],
     ["Diversification score", String(a.scores.diversification)],
     ["Annualized return", formatPercent(a.performance.annualizedReturn)],

@@ -6,7 +6,6 @@ import {
   type Currency,
 } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { PriceSourceTag } from "./price-source-tag";
 
 /** Signed, compact P/L amount, e.g. "+₹19.5K" / "-₹2.1K". */
 function signedCompact(value: number | undefined, currency: Currency): string {
@@ -57,11 +56,8 @@ export function PositionsPnlTable({
                     ? formatCurrency(p.holding.purchasePrice, currency, true)
                     : "—"}
                 </td>
-                <td className="px-4 py-2.5 text-right">
-                  <div className="tabular">
-                    {formatCurrency(p.data.lastPrice, currency, true)}
-                  </div>
-                  <PriceSourceTag source={p.data.priceSource} />
+                <td className="px-4 py-2.5 text-right tabular">
+                  {formatCurrency(p.data.lastPrice, currency, true)}
                 </td>
                 <td className="px-4 py-2.5 text-right">
                   <div className="tabular font-medium">
