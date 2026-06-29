@@ -15,9 +15,6 @@ import {
   Upload,
   PencilLine,
   TrendingUp,
-  LineChart,
-  Wand2,
-  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,38 +28,6 @@ const CAPABILITIES = [
   { icon: Network, title: "Correlation", body: "Full pairwise correlation matrix and average correlation across holdings." },
   { icon: Gauge, title: "Scoring", body: "Transparent Health, Risk and Diversification scores rolled up from documented metrics." },
   { icon: Sparkles, title: "AI commentary", body: "Institutional narrative strictly grounded in the computed analytics." },
-];
-
-const STEPS = [
-  {
-    icon: Upload,
-    title: "Upload your portfolio",
-    body: "Import your holdings using a CSV or Excel file, or add them manually. PortfolioIQ automatically detects portfolio tables, combines data from multiple sheets when needed, and prepares everything for analysis.",
-  },
-  {
-    icon: LineChart,
-    title: "Analyze the numbers",
-    body: "The platform calculates a wide range of portfolio metrics — asset allocation, returns, volatility, Sharpe and Sortino ratios, maximum drawdown, beta, Value at Risk, correlation, diversification, and portfolio health. Every result comes from documented formulas and deterministic calculations, so you always know where the numbers come from.",
-  },
-  {
-    icon: Wand2,
-    title: "Get an AI summary",
-    body: "Once the analysis is complete, AI reviews the calculated metrics and writes a concise investment brief. It only interprets the numbers that have already been computed, so every insight stays grounded in real data.",
-  },
-  {
-    icon: BarChart3,
-    title: "Explore your portfolio",
-    body: "Use interactive charts, compare holdings, filter positions, and export your analysis whenever you need it. Your data stays private throughout the session, and no account is required.",
-  },
-];
-
-const METHODS = [
-  "Herfindahl-Hirschman Index",
-  "Historical VaR (95% / 99%)",
-  "Conditional VaR",
-  "Single-factor beta",
-  "Risk contribution",
-  "Rolling volatility",
 ];
 
 const fadeUp = { hidden: { opacity: 0, y: 18 }, visible: { opacity: 1, y: 0 } };
@@ -169,37 +134,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How it works */}
-      <section id="how-it-works" className="relative mx-auto max-w-5xl scroll-mt-24 px-6 py-14">
-        <SectionHeading eyebrow="How it works" title="From positions to a portfolio brief" center />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((s, i) => {
-            const Icon = s.icon;
-            return (
-              <motion.div
-                key={s.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="glass rounded-2xl p-6"
-              >
-                <div className="mb-3 flex items-center justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <span className="text-2xl font-semibold tabular text-muted-foreground/30">
-                    0{i + 1}
-                  </span>
-                </div>
-                <h3 className="text-sm font-semibold tracking-tight text-foreground">{s.title}</h3>
-                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{s.body}</p>
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
-
       {/* Capabilities */}
       <section className="relative mx-auto max-w-5xl px-6 py-14">
         <SectionHeading eyebrow="Capabilities" title="A full analytics desk, in the browser" center />
@@ -230,50 +164,6 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* About */}
-      <section id="about" className="relative mx-auto max-w-5xl scroll-mt-24 px-6 py-14 pb-24">
-        <SectionHeading eyebrow="About" title="Why PortfolioIQ" center />
-        <div className="glass rounded-2xl p-6 lg:p-10">
-          <div className="mx-auto max-w-3xl space-y-4 text-sm leading-relaxed text-muted-foreground">
-            <p>
-              PortfolioIQ is an institutional-grade portfolio analytics platform
-              built for investors who want to understand <em>why</em> a portfolio
-              behaves the way it does.
-            </p>
-            <p>
-              Instead of relying on opaque AI-generated opinions, PortfolioIQ
-              computes every portfolio metric using transparent quantitative
-              methodology and then uses AI only to explain those results in plain
-              English. Every insight is grounded in deterministic calculations,
-              ensuring the analysis remains accurate, auditable, and free from
-              hallucinated conclusions.
-            </p>
-            <p>
-              Whether you&apos;re evaluating diversification, measuring downside
-              risk, understanding factor exposure, or reviewing portfolio health,
-              PortfolioIQ presents the same core analytics expected from
-              professional investment research platforms through a clean, intuitive
-              interface.
-            </p>
-          </div>
-
-          <div className="mt-7 flex flex-col items-center gap-4 border-t border-border/70 pt-6">
-            <div className="flex flex-wrap justify-center gap-2">
-              {METHODS.map((m) => (
-                <Badge key={m} variant="outline" className="normal-case tracking-normal">
-                  {m}
-                </Badge>
-              ))}
-            </div>
-            <Button asChild size="sm">
-              <Link href="/portfolio">
-                Build your portfolio
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

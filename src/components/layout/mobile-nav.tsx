@@ -5,12 +5,11 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Menu, X, LineChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { href: "/#how-it-works", label: "How it works?" },
-  { href: "/#about", label: "About" },
+  { href: "/how-it-works", label: "How it works?" },
+  { href: "/about", label: "About" },
   { href: "/dashboard", label: "Analytics" },
 ];
 
@@ -84,11 +83,6 @@ export function MobileNav() {
             </Link>
           </Button>
         </nav>
-
-        <div className="flex items-center justify-between border-t border-border p-4">
-          <span className="text-2xs uppercase tracking-wider text-muted-foreground">Appearance</span>
-          <ThemeToggle />
-        </div>
       </aside>
     </div>
   );

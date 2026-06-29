@@ -32,7 +32,7 @@ export function Header() {
         {/* Nav tiles */}
         <nav className="flex items-center gap-2 sm:gap-3">
           <Link
-            href="/#how-it-works"
+            href="/how-it-works"
             className="hidden rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:block"
           >
             How it works?
@@ -41,7 +41,7 @@ export function Header() {
             <Link href="/portfolio">Build your portfolio</Link>
           </Button>
           <Link
-            href="/#about"
+            href="/about"
             className="hidden rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:block"
           >
             About
@@ -49,7 +49,8 @@ export function Header() {
 
           <span className="mx-1 hidden h-5 w-px bg-border md:block" />
           <ISTClock />
-          <ThemeToggle className="hidden sm:inline-flex" />
+          {/* Theme toggle stays in the header (outside the mobile drawer). */}
+          <ThemeToggle />
 
           {/* Mobile menu (drawer) */}
           <MobileNav />
