@@ -12,23 +12,23 @@ export const metadata: Metadata = {
 const STEPS = [
   {
     icon: Upload,
-    title: "Upload your portfolio",
+    title: "Add your portfolio",
     body: "Import your holdings using a CSV or Excel file, or add them manually. PortfolioIQ automatically detects portfolio tables, combines data from multiple sheets when needed, and prepares everything for analysis.",
   },
   {
     icon: LineChart,
-    title: "Analyze the numbers",
+    title: "Risk & Performance Analysis",
     body: "The platform calculates a wide range of portfolio metrics — asset allocation, returns, volatility, Sharpe and Sortino ratios, maximum drawdown, beta, Value at Risk, correlation, diversification, and portfolio health. Every result comes from documented formulas and deterministic calculations, so you always know where the numbers come from.",
   },
   {
     icon: Wand2,
-    title: "Get an AI summary",
+    title: "AI Investment Brief",
     body: "Once the analysis is complete, AI reviews the calculated metrics and writes a concise investment brief. It only interprets the numbers that have already been computed, so every insight stays grounded in real data.",
   },
   {
     icon: BarChart3,
-    title: "Explore your portfolio",
-    body: "Use interactive charts, compare holdings, filter positions, and export your analysis whenever you need it. Your data stays private throughout the session, and no account is required.",
+    title: "Dive Deeper",
+    body: "Explore the Dashboard. Use interactive charts, compare holdings, filter positions, and export your analysis whenever you need it. Your data stays private throughout the session, and no account is required.",
   },
 ];
 
