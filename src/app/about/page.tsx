@@ -45,7 +45,7 @@ export default function AboutPage() {
             investment teams in a simple, interactive dashboard.
           </p>
           <p>
-            Whether you're an investor, finance student, analyst, or simply curious about your portfolio, the goal is the same: to give you clear insights you can trust.
+            Whether you&apos;re an investor, finance student, analyst, or simply curious about your portfolio, the goal is the same: to give you clear insights you can trust.
           </p>
         </div>
 
