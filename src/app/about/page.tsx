@@ -1,3 +1,4 @@
+// About page — copy maintained by the PortfolioIQ team.
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
