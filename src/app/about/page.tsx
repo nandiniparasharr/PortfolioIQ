@@ -32,24 +32,20 @@ export default function AboutPage() {
 
         <div className="mt-6 space-y-5 text-sm leading-relaxed text-muted-foreground lg:text-base">
           <p>
-            PortfolioIQ is an institutional-grade portfolio analytics platform
-            built for investors who want to understand <em>why</em> a portfolio
-            behaves the way it does.
+          PortfolioIQ is a portfolio analytics platform built to help investors understand what is actually happening inside their portfolios.
           </p>
           <p>
-            Instead of relying on opaque AI-generated opinions, PortfolioIQ
-            computes every portfolio metric using transparent quantitative
-            methodology and then uses AI only to explain those results in plain
-            English. Every insight is grounded in deterministic calculations,
-            ensuring the analysis remains accurate, auditable, and free from
-            hallucinated conclusions.
+            Most tools either overwhelm you with numbers or generate generic insights. PortfolioIQ takes a different approach. 
+            Every portfolio is analyzed using transparent quantitative models first, followed by AI-powered commentary that is generated directly 
+            from the computed results. Every observation is grounded in the underlying analysis, making the insights consistent, explainable, and 
+            backed by data rather than assumptions.
           </p>
           <p>
-            Whether you&apos;re evaluating diversification, measuring downside
-            risk, understanding factor exposure, or reviewing portfolio health,
-            PortfolioIQ presents the same core analytics expected from
-            professional investment research platforms through a clean, intuitive
-            interface.
+            From diversification and risk to performance and downside exposure, PortfolioIQ provides the same core analytics used by professional 
+            investment teams in a simple, interactive dashboard.
+          </p>
+          <p>
+            Whether you're an investor, finance student, analyst, or simply curious about your portfolio, the goal is the same: to give you clear insights you can trust.
           </p>
         </div>
 
