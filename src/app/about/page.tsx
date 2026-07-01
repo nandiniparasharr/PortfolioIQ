@@ -28,7 +28,7 @@ export default function AboutPage() {
       <div className="relative mx-auto max-w-3xl px-6 py-12 lg:py-16">
         <div className="text-2xs font-semibold uppercase tracking-wider text-primary">About</div>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight text-foreground lg:text-4xl">
-          Why PortfolioIQ
+          PortfolioIQ
         </h1>
 
         <div className="mt-6 space-y-5 text-sm leading-relaxed text-muted-foreground lg:text-base">
