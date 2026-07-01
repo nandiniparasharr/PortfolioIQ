@@ -1,4 +1,5 @@
 import { Mail, Linkedin } from "lucide-react";
+import { LeaveImprint } from "@/components/imprints/leave-imprint";
 
 const EMAIL = "nandiniiparashar@gmail.com";
 const LINKEDIN_URL = "https://www.linkedin.com/in/nandiniparashar";
@@ -77,6 +78,9 @@ export function BehindSection() {
             </a>
           </div>
         </div>
+
+        {/* Leave an Imprint — below the contact cards */}
+        <LeaveImprint />
       </div>
     </section>
   );
