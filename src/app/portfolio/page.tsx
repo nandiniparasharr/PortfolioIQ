@@ -48,7 +48,7 @@ export default function PortfolioPage() {
             <div className="text-2xs font-semibold uppercase tracking-wider text-primary">
               Portfolio Builder
             </div>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight">Build your portfolio</h1>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight">Analyze your portfolio</h1>
             <p className="mt-1 max-w-xl text-sm text-muted-foreground">
               Upload a file or add positions by hand. Everything stays in your
               browser for this session — nothing is uploaded or stored.

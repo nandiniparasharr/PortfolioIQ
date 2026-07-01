@@ -74,7 +74,7 @@ export default function HowItWorksPage() {
         <div className="mt-10 flex flex-wrap items-center gap-3">
           <Button asChild>
             <Link href="/portfolio">
-              Build your portfolio
+              Analyze your portfolio
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>

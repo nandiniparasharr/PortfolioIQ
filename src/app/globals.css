@@ -56,18 +56,19 @@
   }
 
   .dark {
-    --background: 240 9% 4%;
+    /* Dark theme canvas is a deep navy (not pitch black). */
+    --background: 222 47% 7%;
     --foreground: 0 0% 98%;
 
-    --surface: 240 8% 7%;
-    --surface-muted: 240 7% 10%;
-    --surface-raised: 240 7% 12%;
+    --surface: 221 42% 11%;
+    --surface-muted: 221 36% 14%;
+    --surface-raised: 221 34% 17%;
 
-    --card: 240 8% 7%;
+    --card: 221 42% 11%;
     --card-foreground: 0 0% 98%;
 
-    --muted: 240 6% 16%;
-    --muted-foreground: 240 6% 70%;
+    --muted: 221 28% 19%;
+    --muted-foreground: 217 20% 72%;
 
     --primary: 217 92% 62%;
     --primary-foreground: 0 0% 100%;
@@ -79,17 +80,17 @@
     --negative: 358 75% 66%;
     --warning: 38 92% 62%;
 
-    --border: 240 6% 17%;
-    --input: 240 6% 20%;
+    --border: 221 26% 22%;
+    --input: 221 26% 25%;
     --ring: 217 92% 62%;
 
     /* Hero accent — dark theme uses an all-coral gradient. */
     --hero-from: 16 100% 76%;
     --hero-to: 4 92% 63%;
 
-    --glass-bg: 240 8% 9%;
+    --glass-bg: 221 44% 13%;
     --glass-opacity: 0.55;
-    --glass-border: 240 8% 26%;
+    --glass-border: 221 30% 32%;
     --glass-highlight: 0 0% 90%;
     --aurora-1: 8 92% 62%;
     --aurora-2: 210 92% 60%;
@@ -150,6 +151,48 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+  }
+
+  /* Liquid-glass top navigation bar — frosted, translucent, with a soft
+     sheen along the top edge and a hairline shadow underneath. */
+  .glass-bar {
+    background-color: hsl(var(--glass-bg) / 0.6);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid hsl(var(--glass-border) / 0.6);
+    box-shadow:
+      inset 0 1px 0 0 hsl(var(--glass-highlight) / 0.18),
+      0 10px 30px -22px hsl(221 60% 4% / 0.55);
+  }
+  .glass-bar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      hsl(var(--glass-highlight) / 0.06),
+      transparent 40%
+    );
+  }
+
+  /* Pill-style nav link/tile used inside the liquid-glass bar. */
+  .nav-pill {
+    border-radius: 9999px;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: hsl(var(--muted-foreground));
+    transition:
+      color 0.2s ease,
+      background-color 0.2s ease;
+  }
+  .nav-pill:hover {
+    color: hsl(var(--foreground));
+    background-color: hsl(var(--glass-highlight) / 0.08);
+  }
+  .dark .nav-pill:hover {
+    background-color: hsl(var(--glass-highlight) / 0.06);
   }
 
   /* Liquid-glass surface. */

@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 const LINKS = [
   { href: "/how-it-works", label: "How it works?" },
   { href: "/about", label: "About" },
+  { href: "/behind", label: "Behind PortfolioIQ" },
   { href: "/dashboard", label: "Analytics" },
 ];
 
@@ -79,7 +80,7 @@ export function MobileNav() {
 
           <Button asChild className="mt-3 w-full">
             <Link href="/portfolio" onClick={() => setOpen(false)}>
-              Build your portfolio
+              Analyze your portfolio
             </Link>
           </Button>
         </nav>

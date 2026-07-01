@@ -84,7 +84,7 @@ export default function HomePage() {
           >
             <Button asChild size="lg">
               <Link href="/portfolio">
-                Build your portfolio
+                Analyze your portfolio
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
