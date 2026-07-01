@@ -5,12 +5,13 @@ import { LineChart } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { ISTClock } from "./ist-clock";
 import { ScrollNav } from "./scroll-nav";
+import { MobileNav } from "./mobile-nav";
 
 /**
  * Top navigation header (liquid-glass bar).
  * Centered pill nav with scroll-spy: About · How it works · Analyze your
  * portfolio · Behind PortfolioIQ. Theme toggle sits in the top-right corner.
- * On small screens the pill rail drops to its own horizontally-scrollable row.
+ * On small screens the pill nav is replaced by a hamburger + slide-in sidebar.
  */
 export function Header() {
   return (
@@ -39,12 +40,9 @@ export function Header() {
           <div className="flex shrink-0 items-center gap-2">
             <ISTClock />
             <ThemeToggle />
+            {/* Mobile / tablet: hamburger + slide-in sidebar */}
+            <MobileNav />
           </div>
-        </div>
-
-        {/* Pill nav (mobile / tablet) — its own scrollable row */}
-        <div className="pb-3 lg:hidden">
-          <ScrollNav className="justify-start" />
         </div>
       </div>
     </header>
