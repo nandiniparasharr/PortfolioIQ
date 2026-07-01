@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils";
 export const NAV_TABS = [
   { id: "about", label: "About" },
   { id: "how-it-works", label: "How it works" },
-  { id: "analyze", label: "Analyze your portfolio" },
-  { id: "behind", label: "Behind PortfolioIQ" },
+  { id: "analyze", label: "Analyze your portfolio", emphasis: true },
+  { id: "behind", label: "Contact" },
 ] as const;
 
 /**
@@ -57,6 +57,7 @@ export function ScrollNav({ className }: { className?: string }) {
     >
       {NAV_TABS.map((t) => {
         const isActive = onHome && active === t.id;
+        const emphasis = "emphasis" in t && t.emphasis;
         return (
           <Link
             key={t.id}
@@ -64,6 +65,7 @@ export function ScrollNav({ className }: { className?: string }) {
             className={cn(
               "nav-tab whitespace-nowrap rounded-full px-3.5 py-2 text-2xs font-semibold uppercase tracking-wider sm:text-xs",
               isActive && "nav-tab-active",
+              emphasis && !isActive && "nav-tab-emphasis",
             )}
           >
             {t.label}

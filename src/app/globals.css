@@ -211,6 +211,17 @@
       inset 0 1px 0 0 hsl(var(--glass-highlight) / 0.28),
       0 4px 14px -8px hsl(221 60% 4% / 0.55);
   }
+  /* Emphasized tab (the primary "Analyze your portfolio" action) — bold with
+     a primary-colored underline so it stands out from the other tabs. */
+  .nav-tab-emphasis {
+    color: hsl(var(--foreground));
+    font-weight: 800;
+    text-decoration: underline;
+    text-decoration-color: hsl(var(--primary));
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+
   /* Active tab — filled light-blue pill with dark text (matches reference). */
   .nav-tab-active {
     color: hsl(222 47% 16%);
