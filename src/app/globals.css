@@ -109,6 +109,7 @@
    */
   html {
     background-color: hsl(var(--background));
+    scroll-behavior: smooth;
   }
 
   body {
@@ -176,23 +177,47 @@
     );
   }
 
-  /* Pill-style nav link/tile used inside the liquid-glass bar. */
-  .nav-pill {
-    border-radius: 9999px;
-    padding: 0.4rem 0.85rem;
-    font-size: 0.875rem;
-    font-weight: 500;
+  /*
+   * Segmented pill navigation (scroll-spy). A rounded liquid-glass rail holds
+   * the tabs; the active tab is a filled light-blue pill, and hovering a tab
+   * reveals a frosted "liquid glass" highlight.
+   */
+  .glass-nav {
+    background-color: hsl(var(--glass-bg) / 0.5);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    border: 1px solid hsl(var(--glass-border) / 0.6);
+    box-shadow:
+      inset 0 1px 0 0 hsl(var(--glass-highlight) / 0.16),
+      0 8px 26px -18px hsl(221 60% 4% / 0.5);
+  }
+
+  .nav-tab {
+    position: relative;
     color: hsl(var(--muted-foreground));
     transition:
       color 0.2s ease,
-      background-color 0.2s ease;
+      background-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
   }
-  .nav-pill:hover {
+  /* Liquid-glass hover — frosted, translucent highlight behind the tab. */
+  .nav-tab:not(.nav-tab-active):hover {
     color: hsl(var(--foreground));
-    background-color: hsl(var(--glass-highlight) / 0.08);
+    background-color: hsl(var(--glass-highlight) / 0.12);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow:
+      inset 0 1px 0 0 hsl(var(--glass-highlight) / 0.28),
+      0 4px 14px -8px hsl(221 60% 4% / 0.55);
   }
-  .dark .nav-pill:hover {
-    background-color: hsl(var(--glass-highlight) / 0.06);
+  /* Active tab — filled light-blue pill with dark text (matches reference). */
+  .nav-tab-active {
+    color: hsl(222 47% 16%);
+    background-color: hsl(214 96% 80%);
+    box-shadow:
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.45),
+      0 3px 12px -3px hsl(214 96% 55% / 0.55);
   }
 
   /* Liquid-glass surface. */
@@ -256,6 +281,17 @@
       linear-gradient(to bottom, hsl(var(--border) / 0.6) 1px, transparent 1px);
     background-size: 46px 46px;
     mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%);
+  }
+}
+
+@layer utilities {
+  /* Hide the scrollbar on the horizontally-scrollable mobile nav rail. */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
 
