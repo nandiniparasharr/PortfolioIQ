@@ -127,8 +127,8 @@ export function DashboardView() {
             <CardHeader>
               <CardTitle>Asset Class</CardTitle>
             </CardHeader>
-            <CardContent>
-              <AllocationDonut data={a.allocation.byAssetClass} currency={ccy} />
+            <CardContent className="py-6">
+              <AllocationDonut data={a.allocation.byAssetClass} currency={ccy} size="lg" />
             </CardContent>
           </Card>
           <div className="space-y-4">
