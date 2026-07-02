@@ -20,7 +20,7 @@ export function Section({
     <section id={id} className={cn("scroll-mt-20", className)}>
       <div className="mb-4 flex items-end justify-between gap-4">
         <div>
-          <h2 className="text-base font-semibold tracking-tight">{title}</h2>
+          <h2 className="font-display text-lg">{title}</h2>
           {description && (
             <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
           )}

@@ -33,7 +33,7 @@ export function HowItWorksSection() {
         <div className="text-2xs font-semibold uppercase tracking-wider text-primary">
           How it works
         </div>
-        <h2 className="mt-1 text-3xl font-semibold tracking-tight text-foreground lg:text-4xl">
+        <h2 className="font-display mt-1 text-3xl text-foreground lg:text-4xl">
           From positions to a portfolio brief
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground lg:text-base">

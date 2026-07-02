@@ -33,6 +33,16 @@ export function ImprintField() {
 
   return (
     <div className="pointer-events-none absolute inset-0 z-30 overflow-hidden">
+      {/* Shared paint server for the glyphs' gradient "shiny" strokes. */}
+      <svg width="0" height="0" className="absolute" aria-hidden focusable="false">
+        <defs>
+          <linearGradient id="artifact-shine" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="hsl(222 90% 66%)" />
+            <stop offset="55%" stopColor="hsl(258 82% 66%)" />
+            <stop offset="100%" stopColor="hsl(288 72% 62%)" />
+          </linearGradient>
+        </defs>
+      </svg>
       {imprints.map((im) => (
         <Marker key={im.id} imprint={im} gutter={gutter} highlighted={highlightId === im.id} />
       ))}
@@ -87,15 +97,15 @@ function Marker({
         type="button"
         aria-label={`Artifact: ${artifact.name}, left by ${imprint.name}`}
         onClick={() => setOpen((o) => !o)}
-        className={cn(
-          "group relative flex h-9 w-9 items-center justify-center rounded-full text-foreground/25 transition-all duration-300 hover:text-primary focus:outline-none focus-visible:text-primary",
-          highlighted && "text-primary",
-        )}
+        data-lit={highlighted || undefined}
+        className="artifact-glyph group relative flex h-9 w-9 items-center justify-center rounded-full transition-all duration-300 focus:outline-none"
       >
         <span
           className={cn(
             "absolute inset-0 rounded-full transition-all duration-500",
-            highlighted ? "animate-ping bg-primary/20 ring-2 ring-primary/60" : "bg-transparent",
+            highlighted
+              ? "animate-ping bg-[hsl(265_80%_60%/0.2)] ring-2 ring-[hsl(265_80%_65%/0.6)]"
+              : "bg-transparent",
           )}
         />
         <Icon

@@ -24,10 +24,11 @@
     --muted: 44 30% 90%;
     --muted-foreground: 220 18% 34%;
 
-    --primary: 221 83% 53%;
+    /* A deeper ink-sapphire primary reads richer on the ivory canvas. */
+    --primary: 223 78% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --accent: 221 83% 53%;
+    --accent: 223 78% 50%;
     --accent-foreground: 0 0% 100%;
 
     --positive: 152 64% 30%;
@@ -70,10 +71,11 @@
     --muted: 221 28% 19%;
     --muted-foreground: 217 20% 72%;
 
-    --primary: 217 92% 62%;
+    /* Slightly brighter azure so it stays luminous on the deep navy. */
+    --primary: 218 92% 64%;
     --primary-foreground: 0 0% 100%;
 
-    --accent: 217 92% 62%;
+    --accent: 218 92% 64%;
     --accent-foreground: 0 0% 100%;
 
     --positive: 152 60% 54%;
@@ -222,13 +224,17 @@
     text-underline-offset: 4px;
   }
 
-  /* Active tab — filled light-blue pill with dark text (matches reference). */
+  /* Active tab — soft sky→periwinkle gradient pill with dark text. */
   .nav-tab-active {
     color: hsl(222 47% 16%);
-    background-color: hsl(214 96% 80%);
+    background-image: linear-gradient(
+      135deg,
+      hsl(210 96% 82%) 0%,
+      hsl(222 92% 78%) 100%
+    );
     box-shadow:
-      inset 0 1px 0 0 hsl(0 0% 100% / 0.45),
-      0 3px 12px -3px hsl(214 96% 55% / 0.55);
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.5),
+      0 3px 12px -3px hsl(218 95% 58% / 0.55);
   }
 
   /* Serif display face for editorial moments (Imprint section headings). */
@@ -291,6 +297,81 @@
   }
   .btn-imprint:active {
     transform: translateY(0);
+  }
+
+  /*
+   * Primary action — the blue sibling of .btn-imprint: a sapphire→azure
+   * gradient with the same inner highlight, depth shadow, glow and hover sheen.
+   * Applied through the Button component's default variant.
+   */
+  .btn-blue {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border: none;
+    color: #fff;
+    background-image: linear-gradient(
+      135deg,
+      hsl(217 90% 56%) 0%,
+      hsl(226 84% 55%) 50%,
+      hsl(238 75% 58%) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.26),
+      inset 0 -8px 16px -8px hsl(230 85% 28% / 0.55),
+      0 8px 22px -8px hsl(224 85% 50% / 0.5);
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease,
+      filter 0.25s ease;
+  }
+  .btn-blue::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      110deg,
+      transparent 30%,
+      hsl(0 0% 100% / 0.2) 50%,
+      transparent 70%
+    );
+    transform: translateX(-120%);
+    transition: transform 0.6s ease;
+  }
+  .btn-blue:hover {
+    transform: translateY(-1px);
+    filter: saturate(110%);
+    box-shadow:
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.3),
+      inset 0 -8px 16px -8px hsl(230 85% 26% / 0.6),
+      0 12px 30px -10px hsl(224 90% 52% / 0.6);
+  }
+  .btn-blue:hover::after {
+    transform: translateX(120%);
+  }
+  .btn-blue:active {
+    transform: translateY(0);
+  }
+
+  /*
+   * Scattered artifact glyphs — gradient "shiny" strokes (sapphire→iris→orchid
+   * paint server defined once in the imprint field) with a soft violet glow.
+   * Quiet at rest so content leads; full shine on hover/highlight.
+   */
+  .artifact-glyph svg {
+    stroke: url(#artifact-shine) hsl(258 75% 66%);
+    filter: drop-shadow(0 1px 5px hsl(265 80% 55% / 0.3));
+    opacity: 0.5;
+    transition:
+      opacity 0.3s ease,
+      filter 0.3s ease,
+      transform 0.3s ease;
+  }
+  .artifact-glyph:hover svg,
+  .artifact-glyph[data-lit="true"] svg {
+    opacity: 1;
+    filter: drop-shadow(0 2px 10px hsl(265 85% 60% / 0.55));
   }
 
   /* Iris accent for inline links/counters in the Imprint section. */

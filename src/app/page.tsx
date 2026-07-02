@@ -49,10 +49,10 @@ export default function HomePage() {
           <motion.h1
             variants={fadeUp}
             transition={{ duration: 0.5 }}
-            className="mx-auto max-w-3xl text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-foreground lg:text-6xl"
+            className="font-display mx-auto max-w-3xl text-balance text-4xl leading-[1.08] text-foreground lg:text-6xl"
           >
             Your portfolio, analyzed like a{" "}
-            <span className="hero-accent">professional desk</span> would.
+            <em className="hero-accent">professional desk</em> would.
           </motion.h1>
 
           <motion.p
@@ -108,7 +108,7 @@ export default function HomePage() {
           <div className="text-2xs font-semibold uppercase tracking-wider text-primary">
             Capabilities
           </div>
-          <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground lg:text-2xl">
+          <h2 className="font-display mt-1 text-xl text-foreground lg:text-2xl">
             A full analytics desk, in the browser
           </h2>
         </div>

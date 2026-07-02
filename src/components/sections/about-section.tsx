@@ -14,9 +14,7 @@ export function AboutSection() {
     <section id="about" className="relative scroll-mt-32 border-t border-border/60 py-16 lg:py-20">
       <div className="mx-auto max-w-3xl px-6">
         <div className="text-2xs font-semibold uppercase tracking-wider text-primary">About</div>
-        <h2 className="mt-1 text-3xl font-semibold tracking-tight text-foreground lg:text-4xl">
-          PortfolioIQ
-        </h2>
+        <h2 className="font-display mt-1 text-3xl text-foreground lg:text-4xl">PortfolioIQ</h2>
 
         <div className="mt-6 space-y-5 text-sm leading-relaxed text-muted-foreground lg:text-base">
           <p>

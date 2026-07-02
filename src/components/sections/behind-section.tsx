@@ -16,9 +16,7 @@ export function BehindSection() {
             <div className="text-2xs font-semibold uppercase tracking-wider text-primary">
               Behind
             </div>
-            <h2 className="mt-1 text-3xl font-semibold tracking-tight text-foreground lg:text-4xl">
-              PortfolioIQ
-            </h2>
+            <h2 className="font-display mt-1 text-3xl text-foreground lg:text-4xl">PortfolioIQ</h2>
 
             <div className="mt-6 space-y-5 text-sm leading-relaxed text-muted-foreground lg:text-base">
               <p>Hi, I&apos;m Nandini :)</p>
