@@ -1,48 +1,36 @@
 /**
- * Asset-class classification.
+ * Asset-class classification — two buckets only: Equity and Mutual Fund.
  *
- * Unlike sector/geography (which need a securities master we don't have), the
- * broad asset class of a holding can be inferred reliably from its symbol /
- * scheme name and ISIN:
- *   - Mutual-fund scheme names are long / contain spaces, and Indian fund &
- *     ETF ISINs start with "INF" (equities start "INE").
- *   - Debt, gold and ETF wrappers are evident from well-known name keywords.
+ *   Equity        → listed instruments that trade on an exchange: direct stocks
+ *                   AND exchange-traded funds (ETFs, incl. gold/silver/index
+ *                   ETFs like GOLDBEES, NIFTYBEES, HNGSNGBEES).
+ *   Mutual Fund   → open-ended schemes bought at NAV: equity, debt, liquid and
+ *                   fund-of-funds / feeder funds (even when the name references
+ *                   an "ETF" — a Nasdaq "ETF Fund of Fund" is still a MF).
+ *
+ * Inferred from the symbol / scheme name and ISIN (Indian fund ISINs start
+ * "INF", equities "INE") — no securities master required.
  */
-export type AssetClass =
-  | "Equity"
-  | "Mutual Fund"
-  | "ETF"
-  | "Debt"
-  | "Gold / Commodity"
-  | "Other";
+export type AssetClass = "Equity" | "Mutual Fund";
 
 export function classifyAssetClass(ticker: string, isin?: string): AssetClass {
   const s = (ticker ?? "").toUpperCase().trim();
-  if (!s) return "Other";
+  if (!s) return "Mutual Fund";
 
-  const isFundName = /\s/.test(s) || s.length > 18;
+  // Fund-of-funds / feeder schemes are open-ended MFs even if they track an ETF.
+  if (/\bFOF\b/.test(s) || /FUND\s*OF\s*FUND/.test(s) || /FEEDER/.test(s)) {
+    return "Mutual Fund";
+  }
+
+  // Genuine exchange-traded funds trade like equity.
+  if (/\bETF\b/.test(s) || /BEES\b/.test(s)) return "Equity";
+
+  // Open-ended mutual fund: multi-word scheme name, explicit fund/scheme/plan
+  // wording, or an AMC-issued (INF…) ISIN.
+  const isFundName = /\s/.test(s) || s.length > 18 || /\b(FUND|SCHEME|PLAN|MF)\b/.test(s);
   const isInfIsin = !!isin && /^INF/i.test(isin);
-
-  // Gold / silver / commodity — whether wrapped as a fund or an ETF.
-  if (/\b(GOLD|SILVER|COMMODIT|BULLION)\b/.test(s) || /GOLDBEES|SILVERBEES/.test(s)) {
-    return "Gold / Commodity";
-  }
-
-  // Fixed income / debt schemes.
-  if (
-    /\b(DEBT|BOND|GILT|LIQUID|OVERNIGHT|DURATION|FLOATER|TREASURY|INCOME\s?FUND|G-?SEC)\b/.test(s) ||
-    /MONEY\s?MARKET|MONEY-?MARKET|CORPORATE\s?BOND|DYNAMIC\s?BOND|CREDIT\s?RISK|BANKING\s?&?\s?PSU/.test(s)
-  ) {
-    return "Debt";
-  }
-
-  // Exchange-traded funds (index/thematic). Indian ETFs commonly end in "BEES".
-  if (/\bETF\b/.test(s) || /BEES$/.test(s) || /\bIETF\b/.test(s)) {
-    return "ETF";
-  }
-
-  // Remaining mutual-fund schemes.
   if (isFundName || isInfIsin) return "Mutual Fund";
 
+  // Otherwise a listed stock.
   return "Equity";
 }

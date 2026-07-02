@@ -1,6 +1,7 @@
 import "server-only";
 import type { InstrumentData } from "@/types";
 import { syntheticBenchmark, syntheticInstrument } from "./synthetic";
+import { classifyAssetClass } from "@/lib/analytics/asset-class";
 
 /**
  * Server-side market-data orchestrator.
@@ -40,8 +41,42 @@ function isLivePricingEnabled(): boolean {
   return (process.env.MARKET_DATA_PROVIDER ?? "live").toLowerCase() !== "synthetic";
 }
 
+/**
+ * Known Indian ETFs that must be priced at their EXCHANGE price (Yahoo), never
+ * as an AMFI NAV — even when a broker statement lists them by full scheme name.
+ * Keyed by ISIN and by an alphanumeric key, so "HNGSNGBEES", "HNGSNG BEES" and
+ * "Nippon India ETF Hang Seng BeES" all resolve to the correct trading symbol.
+ */
+const ETF_BY_ISIN: Record<string, string> = {
+  INF204KB19I1: "HNGSNGBEES.NS", // Nippon India ETF Hang Seng BeES
+};
+const ETF_BY_KEY: Record<string, string> = {
+  HNGSNGBEES: "HNGSNGBEES.NS",
+  NIFTYBEES: "NIFTYBEES.NS",
+  BANKBEES: "BANKBEES.NS",
+  JUNIORBEES: "JUNIORBEES.NS",
+  GOLDBEES: "GOLDBEES.NS",
+  SILVERBEES: "SILVERBEES.NS",
+  ITBEES: "ITBEES.NS",
+  PSUBNKBEES: "PSUBNKBEES.NS",
+  LIQUIDBEES: "LIQUIDBEES.NS",
+};
+
+function alnumKey(s: string): string {
+  return s.toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+/** Resolve an ETF override symbol from ISIN or a normalized ticker/name. */
+function etfOverrideSymbol(ticker: string, isin?: string): string | undefined {
+  const byIsin = isin ? ETF_BY_ISIN[isin.toUpperCase()] : undefined;
+  return byIsin ?? ETF_BY_KEY[alnumKey(ticker)];
+}
+
 /** Candidate Yahoo symbols for a ticker, given the display currency. */
-function symbolCandidates(ticker: string, currency?: string): string[] {
+function symbolCandidates(ticker: string, currency?: string, isin?: string): string[] {
+  const override = etfOverrideSymbol(ticker, isin);
+  if (override) return [override];
+
   const t = ticker.toUpperCase();
   if (currency === "INR") {
     const base = t.split(/[-\s/]/)[0]!; // strip suffixes like "-RR", "-IV"
@@ -51,28 +86,21 @@ function symbolCandidates(ticker: string, currency?: string): string[] {
 }
 
 /**
- * A mutual fund is identified by a scheme NAME (has spaces / very long), not by
- * its ISIN. Exchange-traded funds (e.g. HNGSNGBEES) have INF-prefixed ISINs too
- * but trade like stocks, so they must use the market price from Yahoo — not the
- * AMFI NAV. Routing on the name shape keeps ETFs on the equity path.
- */
-function isMutualFund(ticker: string): boolean {
-  return /\s/.test(ticker) || ticker.length > 18;
-}
-
-/**
- * Resolve a live price. Mutual funds and equities use independent upstreams and
- * breakers, so a slow/blocked MF lookup never disables equity quotes (or vice
- * versa). The Yahoo breaker only trips after several consecutive failures, so a
- * single transient blip doesn't push the rest of the portfolio "to cost".
+ * Resolve a live price. Exchange-traded instruments (stocks + ETFs, incl. gold/
+ * silver/index ETFs) are priced at market via Yahoo; open-ended mutual funds
+ * (equity, debt, fund-of-funds) are priced at NAV via AMFI. The routing uses the
+ * shared asset-class classifier so pricing and allocation always agree — an ETF
+ * can trade at a real premium/discount to NAV, so it must never use the NAV path.
+ * Independent upstreams/breakers mean a slow/blocked MF lookup never disables
+ * equity quotes (or vice versa); the Yahoo breaker trips only after several fails.
  */
 async function fetchLivePrice(
   ticker: string,
   currency: string | undefined,
   isin: string | undefined,
 ): Promise<number | null> {
-  // Mutual funds → AMFI NAV (AMFI manages its own breaker).
-  if (isMutualFund(ticker)) {
+  // Open-ended mutual funds (but NOT ETFs) → AMFI NAV.
+  if (classifyAssetClass(ticker, isin) === "Mutual Fund") {
     const { fetchMfNav } = await import("./amfi");
     return fetchMfNav(isin, ticker);
   }
@@ -80,7 +108,7 @@ async function fetchLivePrice(
   // Equities / ETFs → Yahoo quote.
   if (Date.now() < yahooDisabledUntil) return null;
   const { fetchYahooPrice } = await import("./yahoo");
-  for (const symbol of symbolCandidates(ticker, currency)) {
+  for (const symbol of symbolCandidates(ticker, currency, isin)) {
     try {
       const price = await fetchYahooPrice(symbol);
       if (price) {
