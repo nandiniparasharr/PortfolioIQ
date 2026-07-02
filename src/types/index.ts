@@ -141,6 +141,7 @@ export interface PortfolioAnalytics {
   positions: ResolvedPosition[];
 
   allocation: {
+    byAssetClass: AllocationSlice[];
     bySector: AllocationSlice[];
     byRegion: AllocationSlice[];
     byMarketCap: AllocationSlice[];

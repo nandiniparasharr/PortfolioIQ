@@ -26,6 +26,7 @@ import type {
 } from "@/types";
 import { clamp } from "@/lib/utils";
 import { todayInIST } from "@/lib/format";
+import { classifyAssetClass } from "./asset-class";
 import {
   TRADING_DAYS_PER_YEAR,
   annualizedReturn,
@@ -367,6 +368,9 @@ export function computeAnalytics(input: EngineInput): PortfolioAnalytics {
 
   // --- 6. Allocation -------------------------------------------------------
   const allocation = {
+    byAssetClass: buildAllocation(positions, (p) =>
+      classifyAssetClass(p.holding.ticker, p.holding.isin),
+    ),
     bySector: buildAllocation(positions, (p) => p.data.meta.sector),
     byRegion: buildAllocation(positions, (p) => p.data.meta.region),
     byMarketCap: buildAllocation(positions, (p) => p.data.meta.marketCapBucket),

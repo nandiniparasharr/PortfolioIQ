@@ -28,12 +28,13 @@ import { AllocationDonut } from "@/components/charts/allocation-donut";
 import { EquityCurveChart } from "@/components/charts/equity-curve";
 import { RollingChart } from "@/components/charts/rolling-chart";
 import { CorrelationHeatmap } from "@/components/charts/correlation-heatmap";
+import { classifyAssetClass } from "@/lib/analytics/asset-class";
 
 export function DashboardView() {
   const holdings = usePortfolioStore((s) => s.holdings);
   const currency = usePortfolioStore((s) => s.currency);
   const { status, data, error } = useAnalytics(holdings, currency);
-  const [sectorFilter, setSectorFilter] = React.useState<string | null>(null);
+  const [classFilter, setClassFilter] = React.useState<string | null>(null);
 
   if (holdings.length === 0) return <EmptyState />;
   if (status === "loading" || status === "idle") return <LoadingState />;
@@ -44,8 +45,10 @@ export function DashboardView() {
   const a = analytics;
   const perf = a.performance;
 
-  const filteredPositions = sectorFilter
-    ? a.positions.filter((p) => p.data.meta.sector === sectorFilter)
+  const filteredPositions = classFilter
+    ? a.positions.filter(
+        (p) => classifyAssetClass(p.holding.ticker, p.holding.isin) === classFilter,
+      )
     : a.positions;
 
   const returnTone: MetricTone =
@@ -121,14 +124,14 @@ export function DashboardView() {
       </Section>
 
       {/* Allocation */}
-      <Section id="allocation" title="Allocation" description="Exposure by sector, geography and market capitalization.">
+      <Section id="allocation" title="Allocation" description="Exposure by asset class, geography and market capitalization.">
         <div className="grid gap-4 lg:grid-cols-3">
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle>Sector Exposure</CardTitle>
+              <CardTitle>Asset Class</CardTitle>
             </CardHeader>
             <CardContent>
-              <AllocationDonut data={a.allocation.bySector} currency={ccy} />
+              <AllocationDonut data={a.allocation.byAssetClass} currency={ccy} />
             </CardContent>
           </Card>
           <div className="space-y-4">
@@ -215,16 +218,16 @@ export function DashboardView() {
         action={
           <div className="flex flex-wrap items-center gap-1.5">
             <button
-              onClick={() => setSectorFilter(null)}
-              className={filterChip(sectorFilter === null)}
+              onClick={() => setClassFilter(null)}
+              className={filterChip(classFilter === null)}
             >
               All
             </button>
-            {a.allocation.bySector.slice(0, 6).map((s) => (
+            {a.allocation.byAssetClass.slice(0, 6).map((s) => (
               <button
                 key={s.label}
-                onClick={() => setSectorFilter(s.label)}
-                className={filterChip(sectorFilter === s.label)}
+                onClick={() => setClassFilter(s.label)}
+                className={filterChip(classFilter === s.label)}
               >
                 {s.label}
               </button>
