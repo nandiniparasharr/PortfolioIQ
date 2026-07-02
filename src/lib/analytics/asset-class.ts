@@ -13,7 +13,7 @@
  */
 export type AssetClass = "Equity" | "Mutual Fund";
 
-export function classifyAssetClass(ticker: string, isin?: string): AssetClass {
+export function classifyAssetClass(ticker: string, _isin?: string): AssetClass {
   const s = (ticker ?? "").toUpperCase().trim();
   if (!s) return "Mutual Fund";
 
@@ -25,13 +25,14 @@ export function classifyAssetClass(ticker: string, isin?: string): AssetClass {
   // Genuine exchange-traded funds trade like equity.
   if (/\bETF\b/.test(s) || /BEES\b/.test(s)) return "Equity";
 
-  // Open-ended mutual fund: multi-word scheme name, explicit fund/scheme/plan
-  // wording, or an AMC-issued (INF…) ISIN.
+  // Open-ended mutual funds are referenced by a scheme NAME (multi-word / long /
+  // explicit "fund" wording). A short exchange ticker — even one with an INF
+  // ISIN, which many ETFs share (NIFTYCASE, MODEFENCE, …) — is exchange-traded,
+  // so ISIN is intentionally NOT used to force the Mutual Fund label.
   const isFundName = /\s/.test(s) || s.length > 18 || /\b(FUND|SCHEME|PLAN|MF)\b/.test(s);
-  const isInfIsin = !!isin && /^INF/i.test(isin);
-  if (isFundName || isInfIsin) return "Mutual Fund";
+  if (isFundName) return "Mutual Fund";
 
-  // Otherwise a listed stock.
+  // Otherwise a listed stock / ETF ticker.
   return "Equity";
 }
 

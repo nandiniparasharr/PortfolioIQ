@@ -49,16 +49,6 @@ export function HoldingsTable({
         ),
       },
       {
-        accessorFn: (p) => p.data.meta.sector,
-        id: "sector",
-        header: "Sector",
-        cell: (ctx) => (
-          <span className="text-xs text-muted-foreground">
-            {ctx.row.original.data.meta.sector}
-          </span>
-        ),
-      },
-      {
         accessorFn: (p) => p.weight,
         id: "weight",
         header: "Weight",

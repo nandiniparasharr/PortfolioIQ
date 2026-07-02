@@ -19,9 +19,15 @@ describe("classifyAssetClass (Equity vs Mutual Fund)", () => {
     expect(classifyAssetClass("Nippon India ETF Hang Seng BeES")).toBe("Equity");
   });
 
-  it("classifies open-ended schemes as Mutual Fund", () => {
+  it("treats short exchange tickers with INF ISINs as Equity (ETFs)", () => {
+    // Many ETFs share the INF ISIN prefix; the ISIN must not force Mutual Fund.
+    expect(classifyAssetClass("NIFTYCASE", "INF204KB1XX0")).toBe("Equity");
+    expect(classifyAssetClass("MODEFENCE", "INF247L01XX0")).toBe("Equity");
+  });
+
+  it("classifies open-ended schemes (by name) as Mutual Fund", () => {
     expect(classifyAssetClass("Parag Parikh Flexi Cap Fund")).toBe("Mutual Fund");
-    expect(classifyAssetClass("SBICONTRA", "INF200K01VT2")).toBe("Mutual Fund");
+    expect(classifyAssetClass("SBI Contra Fund")).toBe("Mutual Fund");
   });
 
   it("classifies debt/liquid funds as Mutual Fund", () => {
