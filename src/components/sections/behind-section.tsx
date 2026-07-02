@@ -25,7 +25,7 @@ export function BehindSection() {
               <p>
                 I&apos;ve always been curious about how portfolios work and how studying them can
                 help people make better investment decisions. PortfolioIQ started as a side project
-                to explore that curiosity and eventually became a product I genuinely enjoyed
+                to explore that curiosity and eventually became something I genuinely enjoyed
                 building.
               </p>
               <p>
