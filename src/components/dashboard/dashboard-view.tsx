@@ -64,8 +64,7 @@ export function DashboardView() {
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {formatCompactCurrency(a.totalValue, ccy)} across {a.diversification.holdingsCount}{" "}
-            holdings · {a.diversification.sectorCount} sectors · as of {formatDate(a.asOf)} IST
-            {perf.observations > 0 && ` · ${perf.observations} trading days`}
+            holdings · as of {formatDate(a.asOf)} IST
           </p>
         </div>
         <div className="flex items-center gap-2">
