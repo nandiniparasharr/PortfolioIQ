@@ -17,8 +17,12 @@ import { useImprints } from "./imprints-provider";
  * shortcut. Placed below the contact cards in the Contact section.
  */
 export function LeaveImprint() {
-  const { count, myId, highlight } = useImprints();
+  const { count, myId, imprints, highlight } = useImprints();
   const [open, setOpen] = React.useState(false);
+
+  // Only offer "Find my imprint" when this visitor's imprint actually exists
+  // (they left one this session/before, and it hasn't since been removed).
+  const hasMyImprint = myId !== null && imprints.some((i) => i.id === myId);
 
   return (
     <div className="mt-10 border-t border-border/60 pt-8">
@@ -44,10 +48,10 @@ export function LeaveImprint() {
           {count === 1 ? "imprint" : "imprints"} left behind
         </span>
 
-        {myId && (
+        {hasMyImprint && (
           <button
             type="button"
-            onClick={() => highlight(myId)}
+            onClick={() => highlight(myId!)}
             className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
           >
             <MapPin className="h-3.5 w-3.5" />
