@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     template: "%s · PortfolioIQ",
   },
   description:
-    "Portfolio analytics: allocation, performance, risk, diversification and AI-assisted commentary. Built for rigorous, transparent portfolio analysis.",
+    "Institutional-grade portfolio analytics: allocation, performance, risk, diversification and AI-assisted commentary. Built for rigorous, transparent portfolio analysis.",
   keywords: [
     "portfolio analytics",
     "risk analytics",

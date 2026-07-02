@@ -144,7 +144,7 @@ function analyticsDigest(a: PortfolioAnalytics): Record<string, unknown> {
 
 const SYSTEM_PROMPT = `You are a senior portfolio strategist.
 You will receive a JSON object of pre-computed portfolio analytics.
-Write concise, professional commentary.
+Write concise, professional commentary in an institutional tone.
 Rules:
 - NEVER invent or alter numbers. Use only the figures provided.
 - Reference specific metrics where relevant.
