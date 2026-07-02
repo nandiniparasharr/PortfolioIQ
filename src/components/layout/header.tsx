@@ -10,7 +10,7 @@ import { MobileNav } from "./mobile-nav";
 /**
  * Top navigation header (liquid-glass bar).
  * Centered pill nav with scroll-spy: About · How it works · Analyze your
- * portfolio · Behind PortfolioIQ. Theme toggle sits in the top-right corner.
+ * portfolio · Behind Portfolio Prism. Theme toggle sits in the top-right corner.
  * On small screens the pill nav is replaced by a hamburger + slide-in sidebar.
  */
 export function Header() {
@@ -24,7 +24,7 @@ export function Header() {
               <LineChart className="h-4.5 w-4.5" strokeWidth={2.2} />
             </span>
             <span className="leading-tight">
-              <span className="block text-sm font-semibold tracking-tight">PortfolioIQ</span>
+              <span className="block text-sm font-semibold tracking-tight">Portfolio Prism</span>
               <span className="block text-2xs uppercase tracking-wider text-muted-foreground">
                 Analytics Platform
               </span>

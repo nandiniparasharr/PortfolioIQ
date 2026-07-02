@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 /**
- * PortfolioIQ design system.
+ * Portfolio Prism design system.
  *
  * The palette is intentionally restrained: a near-black canvas, layered
  * slate surfaces, and a single accent (a desaturated teal/cyan

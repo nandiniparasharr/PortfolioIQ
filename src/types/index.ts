@@ -1,5 +1,5 @@
 /**
- * Domain types for PortfolioIQ.
+ * Domain types for Portfolio Prism.
  *
  * These types are shared across the input layer, the market-data layer and
  * the analytics engine. They are intentionally framework-agnostic so the

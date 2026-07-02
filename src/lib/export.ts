@@ -41,7 +41,7 @@ export function exportHoldingsCsv(a: PortfolioAnalytics) {
     ].join(","),
   );
   download(
-    `portfolioiq-holdings-${a.asOf}.csv`,
+    `portfolio-prism-holdings-${a.asOf}.csv`,
     [header.join(","), ...rows].join("\n"),
     "text/csv",
   );
@@ -50,7 +50,7 @@ export function exportHoldingsCsv(a: PortfolioAnalytics) {
 /** Export the full analytics object as formatted JSON. */
 export function exportAnalyticsJson(a: PortfolioAnalytics) {
   download(
-    `portfolioiq-analytics-${a.asOf}.json`,
+    `portfolio-prism-analytics-${a.asOf}.json`,
     JSON.stringify(a, null, 2),
     "application/json",
   );
@@ -79,7 +79,7 @@ export function exportMetricsCsv(a: PortfolioAnalytics) {
     ["Average correlation", a.risk.averageCorrelation.toFixed(2)],
   ];
   download(
-    `portfolioiq-metrics-${a.asOf}.csv`,
+    `portfolio-prism-metrics-${a.asOf}.csv`,
     ["metric,value", ...lines.map(([k, v]) => `"${k}","${v}"`)].join("\n"),
     "text/csv",
   );

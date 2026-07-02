@@ -16,13 +16,13 @@ export function BehindSection() {
             <div className="text-2xs font-semibold uppercase tracking-wider text-primary">
               Behind
             </div>
-            <h2 className="font-display mt-1 text-3xl text-foreground lg:text-4xl">PortfolioIQ</h2>
+            <h2 className="font-display mt-1 text-3xl text-foreground lg:text-4xl">Portfolio Prism</h2>
 
             <div className="mt-6 space-y-5 text-sm leading-relaxed text-muted-foreground lg:text-base">
               <p>Hi, I&apos;m Nandini :)</p>
               <p>
                 I&apos;ve always been curious about how portfolios work and how studying them can
-                help people make better investment decisions. PortfolioIQ started as a side project
+                help people make better investment decisions. Portfolio Prism started as a side project
                 to explore that curiosity and eventually became something I genuinely enjoyed
                 building.
               </p>
@@ -32,7 +32,7 @@ export function BehindSection() {
                 itself.
               </p>
               <p>
-                I&apos;m still working on improving PortfolioIQ, one feature at a time. If you have
+                I&apos;m still working on improving Portfolio Prism, one feature at a time. If you have
                 any feedback, ideas, or just want to talk about investing, markets, or building
                 interesting products, I&apos;d love to hear from you :)
               </p>

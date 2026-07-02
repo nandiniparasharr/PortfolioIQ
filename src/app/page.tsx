@@ -60,7 +60,7 @@ export default function HomePage() {
             transition={{ duration: 0.5 }}
             className="mx-auto mt-5 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground lg:text-lg"
           >
-            Upload your holdings or build them by hand, and PortfolioIQ computes
+            Upload your holdings or build them by hand, and Portfolio Prism computes
             allocation, performance, risk and diversification analytics from real
             return series — then explains them in plain language.
           </motion.p>

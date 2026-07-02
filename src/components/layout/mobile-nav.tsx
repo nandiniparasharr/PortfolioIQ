@@ -49,7 +49,7 @@ export function MobileNav() {
             <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 text-primary">
               <LineChart className="h-4.5 w-4.5" strokeWidth={2.2} />
             </span>
-            <span className="text-sm font-semibold tracking-tight">PortfolioIQ</span>
+            <span className="text-sm font-semibold tracking-tight">Portfolio Prism</span>
           </Link>
           <button
             type="button"

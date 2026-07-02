@@ -5,8 +5,8 @@ import { AppShell } from "@/components/layout/app-shell";
 
 export const metadata: Metadata = {
   title: {
-    default: "PortfolioIQ — Portfolio Analytics",
-    template: "%s · PortfolioIQ",
+    default: "Portfolio Prism — Portfolio Analytics",
+    template: "%s · Portfolio Prism",
   },
   description:
     "Institutional-grade portfolio analytics: allocation, performance, risk, diversification and AI-assisted commentary. Built for rigorous, transparent portfolio analysis.",
@@ -18,9 +18,9 @@ export const metadata: Metadata = {
     "asset allocation",
     "quantitative finance",
   ],
-  authors: [{ name: "PortfolioIQ" }],
+  authors: [{ name: "Portfolio Prism" }],
   openGraph: {
-    title: "PortfolioIQ — Portfolio Analytics",
+    title: "Portfolio Prism — Portfolio Analytics",
     description:
       "Allocation, performance, risk and diversification analytics with transparent, documented methodology.",
     type: "website",

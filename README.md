@@ -1,8 +1,8 @@
-# PortfolioIQ
+# Portfolio Prism
 
 **Portfolio analytics platform.**
 
-PortfolioIQ analyzes an equity portfolio the way an analytics desk would: it
+Portfolio Prism analyzes an equity portfolio the way an analytics desk would: it
 computes allocation, performance, risk and diversification metrics from real
 daily return series, then layers AI commentary that *interprets* the numbers
 without ever inventing them. The interface is modeled on enterprise financial
@@ -95,7 +95,7 @@ trading app.
 
 ## Architecture
 
-PortfolioIQ follows a strict **compute-then-narrate** pipeline. The deterministic
+Portfolio Prism follows a strict **compute-then-narrate** pipeline. The deterministic
 analytics engine is the source of truth; everything else renders or interprets
 its output.
 
@@ -231,7 +231,7 @@ npm run lint       # next lint
 
 ## Deployment
 
-PortfolioIQ targets **Vercel** with zero configuration:
+Portfolio Prism targets **Vercel** with zero configuration:
 
 1. Import the repository into Vercel.
 2. (Optional) set the environment variables above.

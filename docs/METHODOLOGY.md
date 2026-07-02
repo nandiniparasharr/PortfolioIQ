@@ -1,6 +1,6 @@
 # Analytics Methodology
 
-This document specifies every metric PortfolioIQ computes. All formulas are
+This document specifies every metric Portfolio Prism computes. All formulas are
 implemented in `src/lib/analytics/statistics.ts` (primitives) and
 `src/lib/analytics/engine.ts` (orchestration), and validated in the test suite.
 

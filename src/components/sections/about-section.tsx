@@ -14,22 +14,22 @@ export function AboutSection() {
     <section id="about" className="relative scroll-mt-32 border-t border-border/60 py-16 lg:py-20">
       <div className="mx-auto max-w-3xl px-6">
         <div className="text-2xs font-semibold uppercase tracking-wider text-primary">About</div>
-        <h2 className="font-display mt-1 text-3xl text-foreground lg:text-4xl">PortfolioIQ</h2>
+        <h2 className="font-display mt-1 text-3xl text-foreground lg:text-4xl">Portfolio Prism</h2>
 
         <div className="mt-6 space-y-5 text-sm leading-relaxed text-muted-foreground lg:text-base">
           <p>
-            PortfolioIQ is a portfolio analytics platform built to help investors understand what
+            Portfolio Prism is a portfolio analytics platform built to help investors understand what
             is actually happening inside their portfolios.
           </p>
           <p>
-            Most tools either overwhelm you with numbers or generate generic insights. PortfolioIQ
+            Most tools either overwhelm you with numbers or generate generic insights. Portfolio Prism
             takes a different approach. Every portfolio is analyzed using transparent quantitative
             models first, followed by AI-powered commentary that is generated directly from the
             computed results. Every observation is grounded in the underlying analysis, making the
             insights consistent, explainable, and backed by data rather than assumptions.
           </p>
           <p>
-            From diversification and risk to performance and downside exposure, PortfolioIQ provides
+            From diversification and risk to performance and downside exposure, Portfolio Prism provides
             the same core analytics used by professional investment teams in a simple, interactive
             dashboard.
           </p>

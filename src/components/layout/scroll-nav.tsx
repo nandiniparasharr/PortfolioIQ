@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Single-page section tabs, in the order requested:
- * About · How it works · Analyze your portfolio · Behind PortfolioIQ.
+ * About · How it works · Analyze your portfolio · Behind Portfolio Prism.
  * Each links to a section anchor on the home page.
  */
 export const NAV_TABS = [

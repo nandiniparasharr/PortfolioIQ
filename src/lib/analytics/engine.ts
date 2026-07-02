@@ -1,5 +1,5 @@
 /**
- * The PortfolioIQ analytics engine.
+ * The Portfolio Prism analytics engine.
  *
  * Given a set of holdings resolved against market data, this module computes
  * the full, deterministic `PortfolioAnalytics` object consumed by the

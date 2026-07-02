@@ -4,7 +4,7 @@ const STEPS = [
   {
     icon: Upload,
     title: "Add your portfolio",
-    body: "Import your holdings using a CSV or Excel file, or add them manually. PortfolioIQ automatically detects portfolio tables, combines data from multiple sheets when needed, and prepares everything for analysis.",
+    body: "Import your holdings using a CSV or Excel file, or add them manually. Portfolio Prism automatically detects portfolio tables, combines data from multiple sheets when needed, and prepares everything for analysis.",
   },
   {
     icon: LineChart,
@@ -37,7 +37,7 @@ export function HowItWorksSection() {
           From positions to a portfolio brief
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground lg:text-base">
-          PortfolioIQ computes every metric deterministically and uses AI only to explain the
+          Portfolio Prism computes every metric deterministically and uses AI only to explain the
           results — so the analysis stays accurate and auditable.
         </p>
 
