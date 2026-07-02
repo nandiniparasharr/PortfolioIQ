@@ -192,7 +192,7 @@ $$
 
 **Risk score** (0–100, higher = riskier) blends annualized volatility (0.35),
 max drawdown (0.25), 95% VaR (0.25) and |beta| (0.15), each normalized to a
-sensible institutional ceiling.
+sensible ceiling.
 
 **Health score** (0–100) blends risk-adjusted performance (Sharpe, 0.35),
 diversification (0.30), drawdown containment (0.20) and moderate risk

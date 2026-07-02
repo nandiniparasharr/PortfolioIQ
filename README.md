@@ -1,6 +1,6 @@
 # PortfolioIQ
 
-**Institutional-grade portfolio analytics platform.**
+**Portfolio analytics platform.**
 
 PortfolioIQ analyzes an equity portfolio the way an analytics desk would: it
 computes allocation, performance, risk and diversification metrics from real
@@ -44,7 +44,7 @@ trading app.
 - Session-only persistence (sessionStorage) — no account, no database
 
 **Experience**
-- Light / dark theme toggle (institutional graphite ↔ paper-white)
+- Light / dark theme toggle (graphite ↔ paper-white)
 - Liquid-glass surfaces, animated aurora hero and subtle motion
 - Analytics view stays locked until at least one holding is added
 

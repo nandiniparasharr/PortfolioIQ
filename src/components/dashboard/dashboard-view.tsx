@@ -236,7 +236,7 @@ export function DashboardView() {
       </Section>
 
       {/* Commentary */}
-      <Section id="commentary" title="AI Commentary" description="Institutional narrative interpreting the computed analytics.">
+      <Section id="commentary" title="AI Commentary" description="Narrative interpreting the computed analytics.">
         <CommentaryPanel commentary={commentary} />
       </Section>
     </div>

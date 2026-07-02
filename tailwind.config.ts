@@ -4,7 +4,7 @@ import type { Config } from "tailwindcss";
  * PortfolioIQ design system.
  *
  * The palette is intentionally restrained: a near-black canvas, layered
- * slate surfaces, and a single institutional accent (a desaturated teal/cyan
+ * slate surfaces, and a single accent (a desaturated teal/cyan
  * reminiscent of terminal analytics software). Semantic colors are reserved
  * for data — gains, losses and risk — never for decoration.
  */

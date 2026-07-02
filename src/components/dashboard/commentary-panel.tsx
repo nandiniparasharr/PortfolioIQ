@@ -10,7 +10,7 @@ import type { PortfolioCommentary } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-/** Renders the AI-generated (or deterministic) institutional commentary. */
+/** Renders the AI-generated (or deterministic) commentary. */
 export function CommentaryPanel({ commentary }: { commentary: PortfolioCommentary }) {
   return (
     <div className="space-y-4">

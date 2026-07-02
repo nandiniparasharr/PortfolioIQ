@@ -25,7 +25,7 @@ const CAPABILITIES = [
   { icon: ShieldCheck, title: "Risk engine", body: "Historical VaR & Expected Shortfall, beta and per-position risk attribution." },
   { icon: Network, title: "Correlation", body: "Full pairwise correlation matrix and average correlation across holdings." },
   { icon: Gauge, title: "Scoring", body: "Transparent Health, Risk and Diversification scores rolled up from documented metrics." },
-  { icon: Sparkles, title: "AI commentary", body: "Institutional narrative strictly grounded in the computed analytics." },
+  { icon: Sparkles, title: "AI commentary", body: "Clear narrative strictly grounded in the computed analytics." },
 ];
 
 const fadeUp = { hidden: { opacity: 0, y: 18 }, visible: { opacity: 1, y: 0 } };
@@ -42,7 +42,7 @@ export default function HomePage() {
           <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex justify-center">
             <Badge variant="secondary" className="mb-6 inline-flex items-center gap-1.5 glass">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              Institutional Portfolio Analytics
+              Portfolio Analytics
             </Badge>
           </motion.div>
 
@@ -62,7 +62,7 @@ export default function HomePage() {
           >
             Upload your holdings or build them by hand, and PortfolioIQ computes
             allocation, performance, risk and diversification analytics from real
-            return series — then explains them in plain, institutional language.
+            return series — then explains them in plain language.
           </motion.p>
 
           <motion.div

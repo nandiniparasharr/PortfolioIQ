@@ -2,7 +2,7 @@
   "name": "portfolioiq",
   "version": "0.2.0",
   "private": true,
-  "description": "Institutional-grade portfolio analytics platform",
+  "description": "Portfolio analytics platform",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

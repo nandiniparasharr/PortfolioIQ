@@ -1,4 +1,4 @@
-/** Shared chart palette tuned for the dark institutional theme. */
+/** Shared chart palette tuned for the dark theme. */
 
 /** Categorical series colors — an indigo-led, jewel-toned palette. */
 export const CATEGORICAL = [

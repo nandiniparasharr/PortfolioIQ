@@ -7,7 +7,7 @@ import { formatPercent, formatSignedPercent } from "@/lib/format";
  *
  * Architecture: analytics are ALWAYS computed deterministically first. This
  * module only *interprets* those numbers. When an OpenAI-compatible endpoint
- * is configured, it phrases the already-computed figures into institutional
+ * is configured, it phrases the already-computed figures into professional
  * prose; otherwise a deterministic template generator produces the same
  * structured commentary. The model is never asked to invent numbers — it is
  * given the computed analytics and constrained to interpretation only.
@@ -20,7 +20,7 @@ function topSectors(a: PortfolioAnalytics, n = 2): string {
     .join(" and ");
 }
 
-/** Deterministic, template-based institutional commentary. */
+/** Deterministic, template-based commentary. */
 export function deterministicCommentary(a: PortfolioAnalytics): PortfolioCommentary {
   const perf = a.performance;
   const div = a.diversification;
@@ -142,9 +142,9 @@ function analyticsDigest(a: PortfolioAnalytics): Record<string, unknown> {
   };
 }
 
-const SYSTEM_PROMPT = `You are a senior portfolio strategist at an institutional asset manager.
+const SYSTEM_PROMPT = `You are a senior portfolio strategist.
 You will receive a JSON object of pre-computed portfolio analytics.
-Write concise, professional commentary in an institutional tone.
+Write concise, professional commentary.
 Rules:
 - NEVER invent or alter numbers. Use only the figures provided.
 - Reference specific metrics where relevant.
