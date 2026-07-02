@@ -26,39 +26,49 @@ export function LeaveImprint() {
 
   return (
     <div className="mt-10 border-t border-border/60 pt-8">
-      <div className="text-2xs font-semibold uppercase tracking-wider text-primary">
+      <div className="inline-flex items-center gap-2 text-2xs font-semibold uppercase tracking-[0.18em] text-iris">
+        <Sparkles className="h-3.5 w-3.5" />
         Leave an imprint
       </div>
-      <h3 className="mt-1 text-lg font-semibold tracking-tight text-foreground">
-        A living collection of everyone who stopped by
+
+      <h3 className="font-display mt-2 text-2xl leading-snug text-foreground lg:text-[1.7rem]">
+        Hidden in <em className="text-iris">plain sight</em>
       </h3>
-      <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted-foreground">
-        Leave a tiny artifact behind — it&apos;s placed permanently in the background of the site
-        for future visitors to discover.
+      <div className="mt-3 h-px w-10 bg-gradient-to-r from-[hsl(265,70%,58%)] to-transparent" aria-hidden />
+
+      <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
+        Scattered throughout this website are artifacts left by people who visited before you.
+        Leave one behind.
       </p>
 
-      <div className="mt-4 flex flex-wrap items-center gap-4">
-        <Button onClick={() => setOpen(true)}>
+      <div className="mt-5 flex flex-wrap items-center gap-4">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="btn-imprint inline-flex h-10 items-center gap-2 rounded-xl px-5 text-sm font-semibold"
+        >
           <Sparkles className="h-4 w-4" />
           Leave an Imprint
-        </Button>
+        </button>
 
-        <span className="text-sm tabular text-muted-foreground">
-          <span className="font-semibold text-foreground">{count.toLocaleString()}</span>{" "}
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-surface/60 px-3 py-1.5 text-xs tabular text-muted-foreground">
+          <span className="font-display text-sm font-semibold text-foreground">
+            {count.toLocaleString()}
+          </span>
           {count === 1 ? "imprint" : "imprints"} left behind
         </span>
-
-        {hasMyImprint && (
-          <button
-            type="button"
-            onClick={() => highlight(myId!)}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-          >
-            <MapPin className="h-3.5 w-3.5" />
-            Find my imprint
-          </button>
-        )}
       </div>
+
+      {hasMyImprint && (
+        <button
+          type="button"
+          onClick={() => highlight(myId!)}
+          className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-iris decoration-dotted underline-offset-4 hover:underline"
+        >
+          <MapPin className="h-3.5 w-3.5" />
+          Find my imprint
+        </button>
+      )}
 
       {open && <ImprintModal onClose={() => setOpen(false)} />}
     </div>
@@ -143,12 +153,10 @@ function ImprintModal({ onClose }: { onClose: () => void }) {
           />
         ) : (
           <form onSubmit={onSubmit}>
-            <div className="text-2xs font-semibold uppercase tracking-wider text-primary">
+            <div className="text-2xs font-semibold uppercase tracking-[0.18em] text-iris">
               Leave an imprint
             </div>
-            <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
-              Leave your mark
-            </h2>
+            <h2 className="font-display mt-1 text-2xl text-foreground">Leave your mark</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               A tiny artifact, placed permanently in the background of the site.
             </p>
@@ -264,9 +272,13 @@ function ImprintModal({ onClose }: { onClose: () => void }) {
               <Button type="button" variant="ghost" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={submitting}>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="btn-imprint inline-flex h-9 items-center gap-2 rounded-lg px-5 text-sm font-semibold disabled:pointer-events-none disabled:opacity-60"
+              >
                 {submitting ? "Placing…" : "Leave imprint"}
-              </Button>
+              </button>
             </div>
           </form>
         )}
@@ -291,12 +303,10 @@ function DonePanel({
   const Icon = artifact?.Icon;
   return (
     <div className="py-4 text-center">
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary">
+      <div className="text-iris mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(265_70%_58%/0.14)]">
         {Icon ? <Icon className="h-7 w-7" /> : <Check className="h-7 w-7" />}
       </div>
-      <h2 className="mt-4 text-xl font-semibold tracking-tight text-foreground">
-        Your imprint is placed
-      </h2>
+      <h2 className="font-display mt-4 text-2xl text-foreground">Your imprint is placed</h2>
       <p className="mx-auto mt-1.5 max-w-sm text-sm text-muted-foreground">
         {artifact ? `Your ${artifact.name} is now` : "It's now"} part of the collection, scattered
         into the background of the site. Thanks for stopping by.
