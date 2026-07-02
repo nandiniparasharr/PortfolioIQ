@@ -14,7 +14,7 @@ import {
 } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Section } from "./section";
 import { ScoreGauge } from "./score-gauge";
 import { MetricCard, type MetricTone } from "./metric-card";
@@ -153,6 +153,35 @@ export function DashboardView() {
             </Card>
           </div>
         </div>
+
+        {/* Drill-down: sub-categories within Equity and Mutual Funds */}
+        {(a.allocation.byEquityCategory.length > 0 ||
+          a.allocation.byFundCategory.length > 0) && (
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            {a.allocation.byEquityCategory.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Equity Breakdown</CardTitle>
+                  <CardDescription>Stocks, ETFs and commodity ETFs</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <AllocationDonut data={a.allocation.byEquityCategory} currency={ccy} />
+                </CardContent>
+              </Card>
+            )}
+            {a.allocation.byFundCategory.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Mutual Fund Breakdown</CardTitle>
+                  <CardDescription>Equity, debt, hybrid and commodity funds</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <AllocationDonut data={a.allocation.byFundCategory} currency={ccy} />
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
       </Section>
 
       {/* Performance */}

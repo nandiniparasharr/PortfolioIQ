@@ -26,7 +26,11 @@ import type {
 } from "@/types";
 import { clamp } from "@/lib/utils";
 import { todayInIST } from "@/lib/format";
-import { classifyAssetClass } from "./asset-class";
+import {
+  classifyAssetClass,
+  classifyEquityCategory,
+  classifyFundCategory,
+} from "./asset-class";
 import {
   TRADING_DAYS_PER_YEAR,
   annualizedReturn,
@@ -367,9 +371,22 @@ export function computeAnalytics(input: EngineInput): PortfolioAnalytics {
   };
 
   // --- 6. Allocation -------------------------------------------------------
+  const equityPositions = positions.filter(
+    (p) => classifyAssetClass(p.holding.ticker, p.holding.isin) === "Equity",
+  );
+  const fundPositions = positions.filter(
+    (p) => classifyAssetClass(p.holding.ticker, p.holding.isin) === "Mutual Fund",
+  );
+
   const allocation = {
     byAssetClass: buildAllocation(positions, (p) =>
       classifyAssetClass(p.holding.ticker, p.holding.isin),
+    ),
+    byEquityCategory: buildAllocation(equityPositions, (p) =>
+      classifyEquityCategory(p.holding.ticker),
+    ),
+    byFundCategory: buildAllocation(fundPositions, (p) =>
+      classifyFundCategory(p.holding.ticker),
     ),
     bySector: buildAllocation(positions, (p) => p.data.meta.sector),
     byRegion: buildAllocation(positions, (p) => p.data.meta.region),

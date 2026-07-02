@@ -142,6 +142,10 @@ export interface PortfolioAnalytics {
 
   allocation: {
     byAssetClass: AllocationSlice[];
+    /** Equity bucket split into Stocks / ETFs / Commodity. */
+    byEquityCategory: AllocationSlice[];
+    /** Mutual Fund bucket split into Equity / Debt / Hybrid / Commodity funds. */
+    byFundCategory: AllocationSlice[];
     bySector: AllocationSlice[];
     byRegion: AllocationSlice[];
     byMarketCap: AllocationSlice[];
