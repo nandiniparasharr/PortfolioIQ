@@ -82,6 +82,12 @@ export async function countImprints(): Promise<number> {
   return mem.size;
 }
 
+export async function getImprint(id: string): Promise<Imprint | null> {
+  const r = getRedis();
+  if (r) return (await r.hget<Imprint>(HASH_KEY, id)) ?? null;
+  return mem.get(id) ?? null;
+}
+
 async function checkRate(ip: string): Promise<boolean> {
   const r = getRedis();
   if (!r) return memRateHit(ip);
@@ -130,6 +136,56 @@ export async function addImprint(input: ImprintInput, ip: string): Promise<AddRe
     mem.set(imprint.id, imprint);
   }
   return { ok: true, imprint };
+}
+
+/** Fields an admin may edit. */
+export type ImprintPatch = Partial<{
+  name: string;
+  link: string;
+  message: string;
+  artifact: number;
+  x: number;
+  y: number;
+}>;
+
+export type UpdateResult =
+  | { ok: true; imprint: Imprint }
+  | { ok: false; status: number; error: string };
+
+/** Moderation: edit an existing imprint's details and/or position. */
+export async function updateImprint(id: string, patch: ImprintPatch): Promise<UpdateResult> {
+  const existing = await getImprint(id);
+  if (!existing) return { ok: false, status: 404, error: "Imprint not found." };
+
+  // Re-validate the (merged) text fields and artifact via the shared validator.
+  const merged = {
+    artifact: patch.artifact ?? existing.artifact,
+    name: patch.name ?? existing.name,
+    link: patch.link ?? existing.link ?? "",
+    message: patch.message ?? existing.message ?? "",
+    website: "",
+  };
+  const valid = validateImprint(merged);
+  if (!valid.ok) return { ok: false, status: 400, error: valid.error };
+
+  const clamp = (v: number) => Math.min(1, Math.max(0, v));
+  const updated: Imprint = {
+    ...existing,
+    artifact: valid.value.artifact,
+    name: valid.value.name,
+    link: valid.value.link,
+    message: valid.value.message,
+    x: typeof patch.x === "number" && Number.isFinite(patch.x) ? clamp(patch.x) : existing.x,
+    y: typeof patch.y === "number" && Number.isFinite(patch.y) ? clamp(patch.y) : existing.y,
+  };
+
+  const r = getRedis();
+  if (r) {
+    await r.hset(HASH_KEY, { [id]: updated });
+  } else {
+    mem.set(id, updated);
+  }
+  return { ok: true, imprint: updated };
 }
 
 /** Moderation: remove an imprint. */
