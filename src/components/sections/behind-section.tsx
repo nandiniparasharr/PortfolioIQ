@@ -41,8 +41,9 @@ export function BehindSection() {
             </div>
           </div>
 
-          {/* Contact cards */}
-          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:mt-1 lg:grid-cols-1">
+          {/* Right column: contact cards + leave an imprint */}
+          <div className="mt-8 lg:mt-1">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <a
               href={`mailto:${EMAIL}`}
               className="glass glass-hover flex items-center gap-3 rounded-xl p-4"
@@ -76,11 +77,12 @@ export function BehindSection() {
                 </span>
               </span>
             </a>
+            </div>
+
+            {/* Leave an Imprint — below the contact cards (right column on desktop) */}
+            <LeaveImprint />
           </div>
         </div>
-
-        {/* Leave an Imprint — below the contact cards */}
-        <LeaveImprint />
       </div>
     </section>
   );

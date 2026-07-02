@@ -1,4 +1,4 @@
-import type { InstrumentData, InstrumentMeta, PricePoint } from "@/types";
+import type { InstrumentData, InstrumentMeta, PricePoint, Region, Sector } from "@/types";
 import { TRADING_DAYS_PER_YEAR } from "@/lib/analytics/statistics";
 import {
   bucketForMarketCap,
@@ -83,48 +83,113 @@ function getDates(): string[] {
   return datesCache;
 }
 
+/*
+ * Best-effort classification for tickers/fund names not in the seed catalog.
+ * We have no securities-master here, so we infer sector and geography from the
+ * symbol (equities) or scheme name (mutual funds — whose "ticker" is the full
+ * name). Exact symbol matches win; then keyword tokens; anything unrecognized
+ * stays "Unknown" rather than being assigned a random (wrong) sector.
+ */
+
+// Geography — mostly to detect international funds (US/Nasdaq, China, etc.).
+const GEO_RULES: [RegExp, Region, string][] = [
+  [/\b(NASDAQ|NDX|U\.?S\.?A?|AMERICA|S&?P\s*500|DOW|FANG)\b/, "North America", "United States"],
+  [/\b(HANG\s?SENG|CHINA|SHANGHAI|SHENZHEN)\b/, "Asia Pacific", "China"],
+  [/\b(JAPAN|NIKKEI|TOPIX)\b/, "Asia Pacific", "Japan"],
+  [/\b(EUROPE|EUROZONE|STOXX|GERMANY|DAX|FTSE|FRANCE)\b/, "Europe", "Europe"],
+  [/\b(EMERGING\s?MARKET|\bEM\b)\b/, "Asia Pacific", "Emerging Markets"],
+  [/\b(GLOBAL|WORLD|INTERNATIONAL|DEVELOPED|ACWI)\b/, "Unknown", "Global"],
+];
+
+// Exact NSE/BSE symbols → sector (common large/mid caps).
+const EXACT_SECTOR: Record<string, Sector> = {
+  RELIANCE: "Energy", ONGC: "Energy", IOC: "Energy", BPCL: "Energy", GAIL: "Energy",
+  NTPC: "Utilities", POWERGRID: "Utilities", TATAPOWER: "Utilities", ADANIGREEN: "Utilities",
+  INFY: "Information Technology", TCS: "Information Technology", WIPRO: "Information Technology",
+  HCLTECH: "Information Technology", TECHM: "Information Technology", LTIM: "Information Technology",
+  ITC: "Consumer Staples", HINDUNILVR: "Consumer Staples", NESTLEIND: "Consumer Staples",
+  BRITANNIA: "Consumer Staples", DABUR: "Consumer Staples", MARICO: "Consumer Staples",
+  TATACONSUM: "Consumer Staples", VBL: "Consumer Staples",
+  MARUTI: "Consumer Discretionary", TATAMOTORS: "Consumer Discretionary", TITAN: "Consumer Discretionary",
+  EICHERMOT: "Consumer Discretionary", TRENT: "Consumer Discretionary", HEROMOTOCO: "Consumer Discretionary",
+  "M&M": "Consumer Discretionary", "BAJAJ-AUTO": "Consumer Discretionary",
+  LT: "Industrials", ADANIPORTS: "Industrials", SIEMENS: "Industrials", ABB: "Industrials",
+  BEL: "Industrials", HAL: "Industrials",
+  TATASTEEL: "Materials", JSWSTEEL: "Materials", HINDALCO: "Materials", VEDL: "Materials",
+  COALINDIA: "Materials", ULTRACEMCO: "Materials", GRASIM: "Materials", SHREECEM: "Materials",
+  AMBUJACEM: "Materials", ASIANPAINT: "Materials", PIDILITIND: "Materials",
+  SUNPHARMA: "Health Care", DRREDDY: "Health Care", CIPLA: "Health Care", DIVISLAB: "Health Care",
+  APOLLOHOSP: "Health Care",
+  BHARTIARTL: "Communication Services",
+  SBIN: "Financials", HDFCBANK: "Financials", ICICIBANK: "Financials", KOTAKBANK: "Financials",
+  AXISBANK: "Financials", BAJFINANCE: "Financials", BAJAJFINSV: "Financials", SBILIFE: "Financials",
+  HDFCLIFE: "Financials", ICICIPRULI: "Financials", INDUSINDBK: "Financials", PNB: "Financials",
+  DLF: "Real Estate", GODREJPROP: "Real Estate", OBEROIRLTY: "Real Estate",
+};
+
+// Keyword tokens (substring match, ordered — first hit wins).
+const SECTOR_TOKENS: [string[], Sector][] = [
+  [["PHARMA", "HEALTH", "HOSPITAL", "LIFESCIENCE", "DIAGNOSTIC", "BIOCON", "MEDIC"], "Health Care"],
+  [["BANK", "FINSERV", "NBFC", "INSUR", "FINANC", "BROKING", "WEALTH"], "Financials"],
+  [["TECH", "INFOSYS", "SOFTWARE", "DIGITAL", "NASDAQ", "SEMICON", "INFOTECH"], "Information Technology"],
+  [["TELECOM", "AIRTEL", "MEDIA", "BROADCAST", "ENTERTAIN", "COMMUNICATION"], "Communication Services"],
+  [["MOTOR", "AUTO", "APPAREL", "RETAIL", "HOTEL", "RESTAUR", "JEWEL", "DURABLE"], "Consumer Discretionary"],
+  [["FMCG", "STAPLE", "BEVERAGE", "DAIRY", "CONSUMPTION"], "Consumer Staples"],
+  [["ENERGY", "OIL", "PETRO", "REFINER", "COAL"], "Energy"],
+  [["UTILIT", "POWER", "ELECTRIC", "GRID"], "Utilities"],
+  [["REALTY", "ESTATE", "REIT", "PROPERT"], "Real Estate"],
+  [["STEEL", "METAL", "MINING", "CEMENT", "CHEMICAL", "GOLD", "SILVER", "COMMODIT", "ALUMIN"], "Materials"],
+  [["INFRA", "ENGINEER", "CONSTRUCT", "DEFENCE", "INDUSTRIAL", "LOGISTIC", "RAILWAY"], "Industrials"],
+];
+
+function classifyInstrument(raw: string): { sector?: Sector; region?: Region; country?: string } {
+  const s = raw.toUpperCase();
+
+  let region: Region | undefined;
+  let country: string | undefined;
+  for (const [re, rg, co] of GEO_RULES) {
+    if (re.test(s)) {
+      region = rg;
+      country = co;
+      break;
+    }
+  }
+
+  let sector: Sector | undefined = EXACT_SECTOR[s];
+  if (!sector) {
+    for (const [tokens, sec] of SECTOR_TOKENS) {
+      if (tokens.some((tok) => s.includes(tok))) {
+        sector = sec;
+        break;
+      }
+    }
+  }
+
+  return { sector, region, country };
+}
+
 /** Derive stable pseudo-fundamentals for a ticker not in the catalog. */
 function deriveSeed(ticker: string, currency?: string): InstrumentSeed {
   const t = ticker.toUpperCase();
   const h = hashString(t);
   const rng = mulberry32(h);
   const isINR = currency === "INR";
-  const sectors: InstrumentMeta["sector"][] = [
-    "Information Technology",
-    "Financials",
-    "Health Care",
-    "Consumer Discretionary",
-    "Communication Services",
-    "Industrials",
-    "Consumer Staples",
-    "Energy",
-    "Utilities",
-    "Real Estate",
-    "Materials",
-  ];
-  const regions: InstrumentMeta["region"][] = [
-    "North America",
-    "Europe",
-    "Asia Pacific",
-    "Latin America",
-  ];
-  const sector = sectors[Math.floor(rng() * sectors.length)]!;
-  // For INR portfolios, holdings are Indian — anchor geography accordingly
-  // instead of assigning a random region.
-  const region: InstrumentMeta["region"] = isINR
-    ? "Asia Pacific"
-    : regions[Math.floor(rng() * regions.length)]!;
-  const country = isINR
-    ? "India"
-    : region === "North America"
-      ? "United States"
-      : "International";
+
+  const cls = classifyInstrument(t);
+  const sector: Sector = cls.sector ?? "Unknown";
+  // Geography from the name when we can infer it (e.g. a US/Nasdaq fund held in
+  // INR is North America, not India); otherwise INR portfolios default to India.
+  const region: Region = cls.region ?? (isINR ? "Asia Pacific" : "North America");
+  const country =
+    cls.country ??
+    (isINR ? "India" : region === "North America" ? "United States" : "International");
+
   const marketCap = 5e8 + rng() * 5e11;
   return {
     ticker: t,
     name: `${t} Holdings`,
     sector,
-    industry: `${sector} — Diversified`,
+    industry: sector === "Unknown" ? "Diversified" : `${sector} — Diversified`,
     region,
     country,
     marketCap,

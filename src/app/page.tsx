@@ -88,7 +88,7 @@ export default function HomePage() {
             transition={{ duration: 0.5 }}
             className="mt-6 text-2xs uppercase tracking-wider text-muted-foreground"
           >
-            No account · Processed locally for this session · Not stored
+            No account required · No data stored
           </motion.p>
         </motion.div>
 
