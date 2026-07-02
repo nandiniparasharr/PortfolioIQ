@@ -49,10 +49,10 @@ export default function HomePage() {
           <motion.h1
             variants={fadeUp}
             transition={{ duration: 0.5 }}
-            className="font-display mx-auto max-w-3xl text-balance text-4xl leading-[1.08] text-foreground lg:text-6xl"
+            className="mx-auto max-w-3xl text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-foreground lg:text-6xl"
           >
             Your portfolio, analyzed like a{" "}
-            <em className="hero-accent">professional desk</em> would.
+            <span className="hero-accent">professional desk</span> would.
           </motion.h1>
 
           <motion.p

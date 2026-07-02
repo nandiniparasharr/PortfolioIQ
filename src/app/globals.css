@@ -24,11 +24,11 @@
     --muted: 44 30% 90%;
     --muted-foreground: 220 18% 34%;
 
-    /* A deeper ink-sapphire primary reads richer on the ivory canvas. */
-    --primary: 223 78% 50%;
+    /* A cool, deep azure primary reads richer on the ivory canvas. */
+    --primary: 212 82% 46%;
     --primary-foreground: 0 0% 100%;
 
-    --accent: 223 78% 50%;
+    --accent: 212 82% 46%;
     --accent-foreground: 0 0% 100%;
 
     --positive: 152 64% 30%;
@@ -37,7 +37,7 @@
 
     --border: 42 26% 84%;
     --input: 42 26% 82%;
-    --ring: 221 83% 53%;
+    --ring: 212 82% 46%;
 
     --radius: 0.625rem;
 
@@ -71,11 +71,11 @@
     --muted: 221 28% 19%;
     --muted-foreground: 217 20% 72%;
 
-    /* Slightly brighter azure so it stays luminous on the deep navy. */
-    --primary: 218 92% 64%;
+    /* Cool luminous azure on the deep navy. */
+    --primary: 208 92% 62%;
     --primary-foreground: 0 0% 100%;
 
-    --accent: 218 92% 64%;
+    --accent: 208 92% 62%;
     --accent-foreground: 0 0% 100%;
 
     --positive: 152 60% 54%;
@@ -84,7 +84,7 @@
 
     --border: 221 26% 22%;
     --input: 221 26% 25%;
-    --ring: 217 92% 62%;
+    --ring: 208 92% 62%;
 
     /* Hero accent — dark theme uses an all-coral gradient. */
     --hero-from: 16 100% 76%;
@@ -224,17 +224,17 @@
     text-underline-offset: 4px;
   }
 
-  /* Active tab — soft sky→periwinkle gradient pill with dark text. */
+  /* Active tab — cool ice-blue gradient pill with dark text. */
   .nav-tab-active {
     color: hsl(222 47% 16%);
     background-image: linear-gradient(
       135deg,
-      hsl(210 96% 82%) 0%,
-      hsl(222 92% 78%) 100%
+      hsl(196 92% 80%) 0%,
+      hsl(208 90% 74%) 100%
     );
     box-shadow:
       inset 0 1px 0 0 hsl(0 0% 100% / 0.5),
-      0 3px 12px -3px hsl(218 95% 58% / 0.55);
+      0 3px 12px -3px hsl(204 95% 55% / 0.55);
   }
 
   /* Serif display face for editorial moments (Imprint section headings). */
@@ -312,14 +312,14 @@
     color: #fff;
     background-image: linear-gradient(
       135deg,
-      hsl(217 90% 56%) 0%,
-      hsl(226 84% 55%) 50%,
-      hsl(238 75% 58%) 100%
+      hsl(202 92% 50%) 0%,
+      hsl(213 88% 53%) 50%,
+      hsl(226 78% 56%) 100%
     );
     box-shadow:
       inset 0 1px 0 0 hsl(0 0% 100% / 0.26),
-      inset 0 -8px 16px -8px hsl(230 85% 28% / 0.55),
-      0 8px 22px -8px hsl(224 85% 50% / 0.5);
+      inset 0 -8px 16px -8px hsl(216 85% 26% / 0.55),
+      0 8px 22px -8px hsl(210 88% 48% / 0.5);
     transition:
       transform 0.25s ease,
       box-shadow 0.25s ease,
@@ -344,8 +344,8 @@
     filter: saturate(110%);
     box-shadow:
       inset 0 1px 0 0 hsl(0 0% 100% / 0.3),
-      inset 0 -8px 16px -8px hsl(230 85% 26% / 0.6),
-      0 12px 30px -10px hsl(224 90% 52% / 0.6);
+      inset 0 -8px 16px -8px hsl(216 85% 24% / 0.6),
+      0 12px 30px -10px hsl(210 92% 50% / 0.6);
   }
   .btn-blue:hover::after {
     transform: translateX(120%);

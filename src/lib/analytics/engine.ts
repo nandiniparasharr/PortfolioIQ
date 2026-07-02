@@ -342,14 +342,19 @@ export function computeAnalytics(input: EngineInput): PortfolioAnalytics {
     }
   }
 
+  // Guard every scalar against NaN/Infinity (degenerate series, zero variance):
+  // a non-finite value would serialize to null over JSON and surface as a blank
+  // score/metric in the UI.
+  const finite = (v: number, fallback = 0) => (Number.isFinite(v) ? v : fallback);
+
   const performance = {
-    annualizedReturn: annReturn,
-    annualizedVolatility: annVol,
-    cumulativeReturn: cumulativeReturn(portfolioReturns),
-    sharpeRatio: sharpeRatio(portfolioReturns, rf),
-    sortinoRatio: sortinoRatio(portfolioReturns, rf),
-    maxDrawdown: maxDrawdown(portfolioReturns),
-    beta: beta(portfolioReturns, benchAligned),
+    annualizedReturn: finite(annReturn),
+    annualizedVolatility: finite(annVol),
+    cumulativeReturn: finite(cumulativeReturn(portfolioReturns)),
+    sharpeRatio: finite(sharpeRatio(portfolioReturns, rf)),
+    sortinoRatio: finite(sortinoRatio(portfolioReturns, rf)),
+    maxDrawdown: finite(maxDrawdown(portfolioReturns)),
+    beta: finite(beta(portfolioReturns, benchAligned)),
     observations: portfolioReturns.length,
     equityCurve,
     rolling: buildRolling(portfolioReturns, rollingDates),
@@ -361,13 +366,13 @@ export function computeAnalytics(input: EngineInput): PortfolioAnalytics {
     assetReturns,
   );
   const risk = {
-    valueAtRisk95: historicalVaR(portfolioReturns, 0.95),
-    valueAtRisk99: historicalVaR(portfolioReturns, 0.99),
-    conditionalVaR95: conditionalVaR(portfolioReturns, 0.95),
-    annualizedVolatility: annVol,
+    valueAtRisk95: finite(historicalVaR(portfolioReturns, 0.95)),
+    valueAtRisk99: finite(historicalVaR(portfolioReturns, 0.99)),
+    conditionalVaR95: finite(conditionalVaR(portfolioReturns, 0.95)),
+    annualizedVolatility: finite(annVol),
     contribution: buildContribution(positions, assetReturns, portfolioReturns),
     correlation: correlationMatrix,
-    averageCorrelation: averageCorrelation(correlationMatrix),
+    averageCorrelation: finite(averageCorrelation(correlationMatrix)),
   };
 
   // --- 6. Allocation -------------------------------------------------------

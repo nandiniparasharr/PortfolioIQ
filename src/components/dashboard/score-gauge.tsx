@@ -19,7 +19,7 @@ export function ScoreGauge({
   invert?: boolean;
   size?: number;
 }) {
-  const clamped = Math.max(0, Math.min(100, value));
+  const clamped = Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 0;
   const radius = size / 2 - 10;
   const circumference = Math.PI * radius; // semicircle
   const offset = circumference * (1 - clamped / 100);
