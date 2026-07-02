@@ -60,6 +60,8 @@ const ETF_BY_KEY: Record<string, string> = {
   ITBEES: "ITBEES.NS",
   PSUBNKBEES: "PSUBNKBEES.NS",
   LIQUIDBEES: "LIQUIDBEES.NS",
+  MODEFENCE: "MODEFENCE.NS",
+  NIFTYCASE: "NIFTYCASE.NS",
 };
 
 function alnumKey(s: string): string {
@@ -105,22 +107,37 @@ async function fetchLivePrice(
     return fetchMfNav(isin, ticker);
   }
 
-  // Equities / ETFs → Yahoo quote.
-  if (Date.now() < yahooDisabledUntil) return null;
-  const { fetchYahooPrice } = await import("./yahoo");
-  for (const symbol of symbolCandidates(ticker, currency, isin)) {
-    try {
-      const price = await fetchYahooPrice(symbol);
-      if (price) {
-        yahooConsecutiveFails = 0;
-        return price;
+  // Equities / ETFs → Yahoo market price.
+  let yahoo: number | null = null;
+  if (Date.now() >= yahooDisabledUntil) {
+    const { fetchYahooPrice } = await import("./yahoo");
+    for (const symbol of symbolCandidates(ticker, currency, isin)) {
+      try {
+        const price = await fetchYahooPrice(symbol);
+        if (price) {
+          yahooConsecutiveFails = 0;
+          yahoo = price;
+          break;
+        }
+      } catch {
+        yahooConsecutiveFails++;
+        if (yahooConsecutiveFails >= 3) yahooDisabledUntil = Date.now() + BREAKER_MS;
+        break;
       }
-    } catch {
-      yahooConsecutiveFails++;
-      if (yahooConsecutiveFails >= 3) yahooDisabledUntil = Date.now() + BREAKER_MS;
-      return null;
     }
   }
+  if (yahoo != null) return yahoo;
+
+  // Fallback for ETFs that Yahoo doesn't list yet (e.g. newly-launched ones like
+  // NIFTYCASE): AMFI publishes NAVs for ETFs too, matched by their INF-prefixed
+  // ISIN. For a liquid index ETF the NAV ≈ market price, so it's a sound stand-in
+  // when no exchange quote is available.
+  if (isin && /^INF/i.test(isin)) {
+    const { fetchMfNav } = await import("./amfi");
+    const nav = await fetchMfNav(isin, ticker);
+    if (nav != null) return nav;
+  }
+
   return null;
 }
 
